@@ -1,0 +1,7 @@
+.idea/
+.keys/
+.vscode/
+
+config.json
+*.pem
+*.sqlite
