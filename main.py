@@ -5,6 +5,7 @@ import config
 import package_logger
 import salesforce
 import template_import
+import user_import
 
 package_logger.initialize_logging()
 
@@ -24,6 +25,7 @@ def run_main(file_path: str):
 def import_users(file_path):
     user_dict = template_import.import_user_data(file_path)
     sfdc_imported_users = salesforce.import_salesforce_users(user_dict)
+    user_import.onboard_users(sfdc_imported_users)
 
 
 if __name__ == "__main__":
