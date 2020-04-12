@@ -1,0 +1,19 @@
+{
+  "bot_config": {
+    "bot_username": "bot_name_here",
+    "auth_type": "JWT",
+    "auth_host": "https://develop.symphony.com",
+    "auth_port": "443",
+    "api_host": "https://develop.symphony.com",
+    "api_port": "443",
+    "secrets_folder": "keys",
+    "public_key_filename": "pub.pem",
+    "private_key_filename": "priv.pem"
+  },
+  "salesforce": {
+    "username": "my.user@domain.com",
+    "password": "P@ssw0rd1",
+    "security_token": "1234567890abcdefghijk"
+  }
+
+}
