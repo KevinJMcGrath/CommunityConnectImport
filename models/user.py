@@ -37,6 +37,8 @@ class ImportedUser:
         self.sponsor_sfdc_id = csv_row.get('SponsorSFDCId')
         self.sfdc_id = ""
         self.sfdc_account_id = ""
+        self.symphony_id = ""
+        self.password_set = None
 
     def is_valid(self):
         return self.first_name and self.last_name and self.email and self.company and self.sponsor_sfdc_id

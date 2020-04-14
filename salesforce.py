@@ -1,14 +1,19 @@
 import logging
 
+from typing import List, Dict
+
 from simple_salesforce import Salesforce
 
 import config
 
 from models.user import ImportedUser
 
-
-sfdc = Salesforce(username=config.salesforce['username'], password=config.salesforce['password'],
-                      security_token=config.salesforce['security_token'])
+if config.salesforce['is_sandbox']:
+    sfdc = Salesforce(username=config.salesforce['username'], password=config.salesforce['password'],
+                      security_token=config.salesforce['security_token'], domain='test')
+else:
+    sfdc = Salesforce(username=config.salesforce['username'], password=config.salesforce['password'],
+                          security_token=config.salesforce['security_token'])
 log = logging.getLogger()
 
 def import_salesforce_users(user_dict: dict):
@@ -26,11 +31,12 @@ def import_salesforce_users(user_dict: dict):
 
 
 def get_user(user_record: ImportedUser, company_id: str):
-    id, acct_id = search_user(user_record.email)
+    user_id, acct_id = search_user(user_record.email)
 
-    if id:
-        log.info(f'User found in Salesforce already')
+    if user_id:
+        log.info(f'{user_record.email} exists in SFDC with Id: {user_id}')
         user_record.sfdc_account_id = acct_id
+        user_record.sfdc_id = user_id
         return True
     else:
         log.info(f'Creating Contact for email address: {user_record.email}')
@@ -63,6 +69,19 @@ def insert_user(user_record: ImportedUser, company_id: str):
         return None
 
 
+def update_contact_symphony_ids(user_dict: Dict[str, List[ImportedUser]]):
+    log.info('Updating Contacts with Community Connect Ids')
+    payload_list = []
+
+    for user_list in user_dict.values():
+        for user in user_list:
+            payload_list.append({
+                "Id": user.sfdc_id,
+                "Community_Pod_Id__c": user.symphony_id
+            })
+
+    sfdc.bulk.Contact.update(payload_list)
+
 def add_contact_roles(user_record: ImportedUser):
     pass
 
@@ -76,7 +95,7 @@ def search_user(email_address: str):
         record = results[0]
         return record['Id'], record['AccountId']
 
-
+    return None, None
 
 
 def get_company_id(company_name: str):
@@ -93,7 +112,9 @@ def company_search(company_name: str):
     results = sfdc.quick_search(company_name)['searchRecords']
 
     if results:
-        return results[0]['Id']
+        sfdc_id = results[0]['Id']
+        log.info(f'{company_name} found in Salesforce - Id: {sfdc_id}')
+        return sfdc_id
 
     return None
 
@@ -117,3 +138,7 @@ def insert_company(company_name: str):
             log.error(err)
 
         return None
+
+
+def send_welcome_email(user_dict: dict):
+    pass

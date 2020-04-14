@@ -2,7 +2,9 @@
 .keys/
 .vscode/
 logs/
+data/
 
 config.json
 *.pem
 *.sqlite
+

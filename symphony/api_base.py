@@ -1,4 +1,5 @@
 import jsonpickle
+import logging
 import requests
 
 from .session import Session
@@ -37,13 +38,22 @@ class APIBase:
             if response.status_code // 100 != 2:
                 response.raise_for_status()
 
-            return jsonpickle.decode(response.text)
+            # UGH Sometimes Symphony endpoints return nothing instead of empty JSON
+            if response.text:
+                return jsonpickle.decode(response.text)
+            else:
+                return None
+
         except requests.exceptions.HTTPError as http_ex:
-            print(f'HTTP Ex - code: {status_code} - msg: {http_ex.response.text}')
+            logging.error(http_ex)
+
+            if http_ex.response and http_ex.response.text:
+                logging.error(http_ex.response.text)
+
             raise http_ex
         except requests.exceptions.ConnectionError as conn_ex:
-            print(f'Conn Ex: {conn_ex}')
+            logging.error(conn_ex)
             raise conn_ex
         except Exception as ex:
-            print(f'Exception: {ex}')
+            logging.error(ex)
             raise ex

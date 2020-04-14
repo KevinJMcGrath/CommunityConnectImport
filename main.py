@@ -1,3 +1,5 @@
+import logging
+
 from optparse import OptionParser
 from pathlib import Path
 
@@ -7,7 +9,10 @@ import salesforce
 import template_import
 import user_import
 
+from symphony.bot_client import BotClient
+
 package_logger.initialize_logging()
+
 
 def run_main(file_path: str):
     if not file_path:
@@ -23,9 +28,23 @@ def run_main(file_path: str):
         exit(1)
 
 def import_users(file_path):
+    logging.getLogger()
+
+    # try:
+    logging.info('New user onboarding started.')
+    sym_client = BotClient(config.bot_config)
+
     user_dict = template_import.import_user_data(file_path)
-    sfdc_imported_users = salesforce.import_salesforce_users(user_dict)
-    user_import.onboard_users(sfdc_imported_users)
+    salesforce.import_salesforce_users(user_dict)
+    user_import.onboard_users(user_dict, bot_client=sym_client)
+    salesforce.update_contact_symphony_ids(user_dict)
+    salesforce.send_welcome_email(user_dict)
+
+    logging.info('New user onboarding complete.')
+    # except Exception as ex:
+    #     logging.error(ex)
+    #     print(ex)
+    #     exit(1)
 
 
 if __name__ == "__main__":

@@ -1,3 +1,5 @@
+import logging
+
 from datetime import datetime
 from requests import Session as r_session
 from requests.adapters import HTTPAdapter
@@ -29,7 +31,7 @@ class Session:
     def authenticate(self):
         if not self.is_authenticated():
             self.session_token, self.km_token, self.session_expiration = auth_chooser(self.config)
-            print('Session Token: ' + self.session_token)
+            logging.info('Bot client successfully authenticated.')
 
     def get_rest_headers(self, content_type: str = "application/json", user_agent: str = None):
         return {

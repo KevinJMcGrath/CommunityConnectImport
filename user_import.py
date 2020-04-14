@@ -2,43 +2,51 @@ import logging
 
 from typing import List
 
-import ib_gen
-
+from ib_gen import InfoBarrierManager
 from symphony import BotClient
 from models.user import ImportedUser
+
 
 logging.getLogger()
 
 def onboard_users(user_dict: dict, bot_client: BotClient):
+    ibm = InfoBarrierManager(bot_client)
+
     for group_name, user_list in user_dict.items():
         group_name = f"cc_{group_name}"
-        logging.info(f'Inserting Symphony data for group {group_name}...')
-        # create IB group
-        ib_group_id = ib_gen.create_ib_group(group_name, bot_client)
+
+        # Find IB group Id or create if new
+        ib_group_id = ibm.get_ib_group_id(group_name)
 
         # Onboard users
         user_ids = insert_users(user_list, bot_client)
 
         # Add users to IB group
-        ib_gen.add_users_to_ib_group(ib_group_id, user_ids, bot_client)
+        ibm.add_users_to_ib_group(ib_group_id, user_ids)
 
         # Add IB Policies
-        ib_gen.create_all_policy_combinations(ib_group_id, bot_client)
+        ibm.create_all_policy_combinations(ib_group_id)
 
 
 def insert_users(user_list: List[ImportedUser], bot_client: BotClient):
-    sym_user_id_list = []
+    user_id_list = []
     for user in user_list:
-        # Insert new user into Symphony
-        sym_user = bot_client.User.create_symphony_user(user.first_name, user.last_name, user.email,
-                                                       user.email, user.company)
+        user_id = bot_client.User.lookup_user_id(user.email)
 
-        user_id = sym_user['userSystemInfo']['id']
+        if not user_id:
+            # Insert new user into Symphony
+            logging.info(f'Creating user for email {user.email}')
+            sym_user = bot_client.User.create_symphony_user(user.first_name, user.last_name, user.email,
+                                                           user.email, user.company, password_set=user.password_set)
+            user_id = sym_user['userSystemInfo']['id']
+        else:
+            logging.info(f'User {user.email} already exsits on pod ({user_id})')
 
-        sym_user_id_list.append(user_id)
+        user.symphony_id = user_id
+        user_id_list.append(user_id)
 
+    return user_id_list
 
-    return sym_user_id_list
 
 # for each company requested, do the following:
 # 1. create the parent user in symphony

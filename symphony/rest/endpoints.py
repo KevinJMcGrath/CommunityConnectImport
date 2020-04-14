@@ -51,7 +51,7 @@ def lookup_user_list(user_emails: list, local_users_only: bool):
     return f'pod/v3/users?local={str(local_users_only).lower()}&email={qs}'
 
 
-def lookup_user(user_email: str, local_users_only: bool):
+def lookup_user(user_email: str, local_users_only: bool = True):
     return f'pod/v3/users?local={str(local_users_only).lower()}&email={user_email}'
 
 

@@ -1,64 +1,85 @@
-from utility import timeit
+import logging
+
 from symphony.bot_client import BotClient
 
-ib_policies = set()
-ib_groups = {}
 
+class InfoBarrierManager:
+    def __init__(self, bot_client: BotClient):
+        self.client = bot_client
+        self.ib_policies = set()
+        self.ib_groups = {}
 
-# create a set of existing IB policies to check against to see if the policy already exists.
-def populate_existing_ib_policies(bot_client: BotClient):
-    print('Obtaining current IB policy list from POD...', end='')
-    policy_resp = bot_client.InfoBarriers.list_ib_policies()
+        self.populate_existing_ib_groups()
 
-    for pol in policy_resp:
-        key = f'{pol["groups"][0]}_{pol["groups"][0]}'
-        ib_policies.add(key)
+        # This takes waaaaaaaaay too long coming back from the pod.
+        # self.populate_existing_ib_policies()
 
-    print('done!')
+    def populate_existing_ib_policies(self):
+        logging.info('Caching info barrier policies...')
+        policy_resp = self.client.InfoBarriers.list_ib_policies()
 
+        for pol in policy_resp:
+            key = f'{pol["groups"][0]}_{pol["groups"][0]}'
+            self.ib_policies.add(key)
 
-def populate_existing_ib_groups(bot_client: BotClient, filter_prefix: str = None):
-    print('Obtaining current IB group list from POD...', end='')
-    group_resp = bot_client.InfoBarriers.list_ib_groups()
+    def populate_existing_ib_groups(self, filter_prefix: str = None):
+        logging.info('Caching info barrier groups...')
+        group_resp = self.client.InfoBarriers.list_ib_groups()
 
-    for g in group_resp['data']:
-        if not g['active']:
-            continue
-
-        if filter_prefix:
-            if g['name'].startswith(filter_prefix):
-                ib_groups[g['id']] = g['name']
-        else:
-            ib_groups[g['id']] = g['name']
-
-
-def is_existing_policy(ib_group_1_id: str, ib_group_2_id: str):
-    key1 = f'{ib_group_1_id}_{ib_group_2_id}'
-    key2 = f'{ib_group_2_id}_{ib_group_1_id}'
-
-    return key1 in ib_policies or key2 in ib_policies
-
-def create_ib_group(group_name: str, bot_client: BotClient):
-    return bot_client.InfoBarriers.create_ib_user_group(group_name)['data']['id']
-
-
-# This call could be time consuming
-def add_users_to_ib_group(group_id: str, user_ids: list, bot_client: BotClient):
-    bot_client.InfoBarriers.add_users_to_ib_group(group_id, user_ids)
-
-def create_ib_group_policy(group_1_id: str, group_2_id: str, bot_client: BotClient):
-    return bot_client.InfoBarriers.create_ib_policy(group_1_id, group_2_id)['data']['id']
-
-def create_all_policy_combinations(new_group_id: str, bot_client: BotClient):
-    policy_count = 0
-    for group_id in ib_groups:
-        if new_group_id != group_id and not is_existing_policy(group_id, new_group_id):
-            try:
-                bot_client.InfoBarriers.create_ib_policy(new_group_id, group_id)
-                key = f'{new_group_id}_{group_id}'
-                ib_policies.add(key)
-                policy_count += 1
-            except Exception:
+        for g in group_resp['data']:
+            if not g['active']:
                 continue
 
-    print(f'Created {policy_count} new Info Barrier policies.')
+            if filter_prefix:
+                if g['name'].startswith(filter_prefix):
+                    self.ib_groups[g['id']] = g['name']
+            else:
+                self.ib_groups[g['id']] = g['name']
+
+
+    def is_existing_policy(self, ib_group_1_id: str, ib_group_2_id: str):
+        key1 = f'{ib_group_1_id}_{ib_group_2_id}'
+        key2 = f'{ib_group_2_id}_{ib_group_1_id}'
+
+        return key1 in self.ib_policies or key2 in self.ib_policies
+
+
+    def get_ib_group_id(self, group_name: str):
+        if group_name in self.ib_groups.values():
+            # Returns the key (ib group id) by value (ib group name)
+            logging.info(f'IB Group {group_name} found in pod')
+
+            return list(self.ib_groups.keys())[list(self.ib_groups.values()).index(group_name)]
+        else:
+            logging.info(f'Creating IB group with name {group_name}')
+            ib_group_id = self.create_ib_group(group_name)
+            self.ib_groups[ib_group_id] = group_name
+
+            return ib_group_id
+
+    def create_ib_group(self, group_name: str):
+        return self.client.InfoBarriers.create_ib_user_group(group_name)['data']['id']
+
+    def add_users_to_ib_group(self, group_id: str, user_ids: list):
+        logging.info(f'Adding users to IB Group Id {group_id}...')
+        self.client.InfoBarriers.add_users_to_ib_group(group_id, user_ids)
+
+    def create_ib_group_policy(self, group_1_id: str, group_2_id: str):
+        return self.client.InfoBarriers.create_ib_policy(group_1_id, group_2_id)['data']['id']
+
+    def create_all_policy_combinations(self, new_group_id: str):
+        logging.info('Generating IB Policy combinations...')
+        added_policy_count = 0
+        existing_policy_count = 0
+        for group_id in self.ib_groups:
+            if new_group_id != group_id and not self.is_existing_policy(group_id, new_group_id):
+                try:
+                    self.client.InfoBarriers.create_ib_policy(new_group_id, group_id)
+                    key = f'{new_group_id}_{group_id}'
+                    self.ib_policies.add(key)
+                    added_policy_count += 1
+                except Exception as ex:
+                    existing_policy_count += 1
+                    continue
+
+        logging.info(f'Created {added_policy_count} new Info Barrier policies. Policies already in place: {existing_policy_count}')
