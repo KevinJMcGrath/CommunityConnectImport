@@ -37,7 +37,8 @@ def insert_users(user_list: List[ImportedUser], bot_client: BotClient):
             # Insert new user into Symphony
             logging.info(f'Creating user for email {user.email}')
             sym_user = bot_client.User.create_symphony_user(user.first_name, user.last_name, user.email,
-                                                           user.email, user.company, password_set=user.password_set)
+                                                           user.email, user.company, title=user.title,
+                                                            department=user.department, password_set=user.password_set)
             user_id = sym_user['userSystemInfo']['id']
         else:
             logging.info(f'User {user.email} already exsits on pod ({user_id})')

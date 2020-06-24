@@ -30,7 +30,7 @@ def run_main(file_path: str):
 def import_users(file_path):
     logging.getLogger()
 
-    # try:
+
     logging.info('New user onboarding started.')
     sym_client = BotClient(config.bot_config)
 
@@ -41,10 +41,6 @@ def import_users(file_path):
     salesforce.send_welcome_email(user_dict)
 
     logging.info('New user onboarding complete.')
-    # except Exception as ex:
-    #     logging.error(ex)
-    #     print(ex)
-    #     exit(1)
 
 
 if __name__ == "__main__":

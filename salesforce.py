@@ -111,10 +111,11 @@ def company_search(company_name: str):
     sosl_query = 'FIND {' + company_name + '} IN NAME FIELDS RETURNING Account(Id, Name)'
     results = sfdc.quick_search(company_name)['searchRecords']
 
-    if results:
-        sfdc_id = results[0]['Id']
-        log.info(f'{company_name} found in Salesforce - Id: {sfdc_id}')
-        return sfdc_id
+    for res in results:
+        if res['attributes']['type'] == 'Account':
+            sfdc_id = res['Id']
+            log.info(f'{company_name} found in Salesforce - Id: {sfdc_id}')
+            return sfdc_id
 
     return None
 

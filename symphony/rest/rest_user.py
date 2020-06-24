@@ -27,15 +27,18 @@ class User(APIBase):
         return self.get(ep)
 
     def create_symphony_user(self, first_name: str, last_name: str, email: str, username: str, company_name: str,
-                             password_set: Passwords = None):
+                             title: str = None,department: str = None, password_set: Passwords = None):
         user = {
             "userAttributes": {
                 "accountType": "NORMAL",
                 "emailAddress": email,
                 "firstName": first_name[:64],
                 "lastName": last_name[:64],
-                "displayName": f"{first_name[:64]} {last_name[:64]} ({company_name})",
+                "title": title,
+                "displayName": f"{first_name[:64]} {last_name[:64]} [{company_name}]",
                 "userName": username,
+                "division": company_name,
+                "department": department,
                 # This must ALWAYS be one of the pre-defined values on the pod.
                 "companyName": config.pod_company_name,
             },
