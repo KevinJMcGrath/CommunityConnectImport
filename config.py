@@ -1,8 +1,8 @@
 import jsonpickle
-import logging
-import logging.handlers
 
 from pathlib import Path
+
+from models.config import LogType
 
 config_path = Path("./config.json")
 
@@ -14,10 +14,6 @@ pod_company_name = _config['pod_company_name']
 bot_config = _config['bot_config']
 salesforce = _config['salesforce']
 
+LogConfig = LogType(_config['logging'])
 
-# config logger
-
-_logger = logging.getLogger()
-_logger.setLevel(logging.DEBUG)
-_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(name)s - %(message)s')
 

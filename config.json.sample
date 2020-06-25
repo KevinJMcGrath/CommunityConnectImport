@@ -1,4 +1,6 @@
 {
+  "import_path": "",
+  "pod_company_name": "Symphony Community POD",
   "bot_config": {
     "bot_username": "bot_name_here",
     "auth_type": "JWT",
@@ -13,7 +15,13 @@
   "salesforce": {
     "username": "my.user@domain.com",
     "password": "P@ssw0rd1",
-    "security_token": "1234567890abcdefghijk"
+    "security_token": "1234567890abcdefghijk",
+    "is_sandbox": false
+  },
+    "logging": {
+    "log_to_file": false,
+    "log_path": "./logs",
+    "verbose": true
   }
 
 }
