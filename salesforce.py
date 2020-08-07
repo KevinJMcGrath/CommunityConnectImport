@@ -16,11 +16,29 @@ else:
                           security_token=config.salesforce['security_token'])
 log = logging.getLogger()
 
+
+def import_salesforce_single_user(user: ImportedUser):
+    company_id = get_company_id(user.company)
+
+    if company_id:
+        update_company_sponsor(company_id, user.sponsor_sfdc_id)
+    else:
+        return False, 'Unable to save Account to Salesforce'
+
+    if not get_user(user, company_id):
+        return False, 'Unable to save Contact to Salesforce'
+
+
+
 def import_salesforce_users(user_dict: dict):
     return_dict = {}
     for company_name, user_list in user_dict.items():
         company_id = get_company_id(company_name)
+        sponsor_id = user_list[0].sponsor_sfdc_id
+
         if company_id:
+            update_company_sponsor(company_id, sponsor_id)
+
             return_list = []
             for user in user_list:
                 if get_user(user, company_id):
@@ -99,16 +117,31 @@ def search_user(email_address: str):
 
 
 def get_company_id(company_name: str):
-    company_id = company_search(company_name)
+    # company_id = company_search(company_name)
+    company_id = company_query(company_name)
+
     if not company_id:
         log.info(f'{company_name} does not exist. Creating Account in Salesforce.')
         company_id = insert_company(company_name)
 
+
     return company_id
 
 
+def company_query(company_name: str):
+    soql = f"SELECT Id FROM Account WHERE Name = '{company_name}'"
+
+    results = sfdc.query(soql)['records']
+
+    if results:
+        record = results[0]
+        return record['Id']
+
+    return None
+
+
 def company_search(company_name: str):
-    sosl_query = 'FIND {' + company_name + '} IN NAME FIELDS RETURNING Account(Id, Name)'
+    # sosl_query = 'FIND {' + company_name + '} IN NAME FIELDS RETURNING Account(Id, Name)'
     results = sfdc.quick_search(company_name)['searchRecords']
 
     for res in results:
@@ -140,6 +173,23 @@ def insert_company(company_name: str):
 
         return None
 
+def update_company_sponsor(company_id: str, sponsor_id: str):
+    company_payload = {
+        'Symphony_CP_Sponsor__c': sponsor_id
+    }
+
+    result = sfdc.Account.update(company_id, company_payload)
+
+    if result != 204:
+        log.error('Error updating Account sponor reference')
+
+
 
 def send_welcome_email(user_dict: dict):
+    pass
+
+def send_bizops_notification():
+    pass
+
+def send_account_owner_notification():
     pass

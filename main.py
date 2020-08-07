@@ -3,6 +3,7 @@ import logging
 from optparse import OptionParser
 from pathlib import Path
 
+import api.app as api
 import config
 import package_logger
 import salesforce
@@ -41,6 +42,10 @@ def import_users(file_path):
     salesforce.send_welcome_email(user_dict)
 
     logging.info('New user onboarding complete.')
+
+
+def run_api():
+    api.start_app()
 
 
 if __name__ == "__main__":
