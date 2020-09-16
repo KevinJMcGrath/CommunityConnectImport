@@ -35,12 +35,12 @@ def import_users(file_path):
     logging.info('New user onboarding started.')
     sym_client = BotClient(config.bot_config)
 
-    salesforce.send_email_test()
-
     user_dict = template_import.import_user_data(file_path)
     salesforce.import_salesforce_users(user_dict)
     user_import.onboard_users(user_dict, bot_client=sym_client)
     salesforce.update_contact_symphony_ids(user_dict)
+
+    # salesforce.search_users_no_import(user_dict)
     salesforce.send_welcome_email(user_dict)
 
     logging.info('New user onboarding complete.')

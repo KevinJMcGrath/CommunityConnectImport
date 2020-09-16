@@ -115,6 +115,14 @@ def search_user(email_address: str):
 
     return None, None
 
+def search_users_no_import(company_user_dict):
+    for _, company_users in company_user_dict.items():
+        for user in company_users:
+            sfdc_id, account_id = search_user(user.email)
+
+            if sfdc_id:
+                user.sfdc_id = sfdc_id
+
 
 def get_company_id(company_name: str):
     # company_id = company_search(company_name)
@@ -203,26 +211,42 @@ def send_email_test():
 
     sfdc.apexecute(action=rest_path, method='POST', data=payload)
 
-def send_welcome_email(user_dict: dict):
+def send_welcome_email(company_user_dict: dict):
     users_for_email = []
-    for u in user_dict:
-        user = {
-            "to": u.email,
-            "cc": "",
-            "bcc": "sarah@symphony.com",
-            "template_id": "00X1J0000013Q7p",
-            "contact_id": u.sfdc_id,
-            "org_email_id": "0D21J0000000Iu4"
+
+    for _, company_users in company_user_dict.items():
+        for u in company_users:
+            user = {
+                "to": u.email,
+                "cc": "",
+                "bcc": "sarah@symphony.com",
+                "template_id": "00X1J0000013Q7p",
+                "contact_id": u.sfdc_id,
+                "org_email_id": "0D21J0000000Iu4"
+            }
+
+            users_for_email.append(user)
+
+    batch_count, remainder = divmod(len(users_for_email), 10)
+
+    # https://developer.salesforce.com/forums/?id=906F00000008yrGIAQ
+    # Because Apex only allows 10 SendEmail invocations per transaction, I need
+    # to break this up into chunks to submit.
+    # TODO: Change the REST endpoint to a batch system instead.
+    if remainder > 0:
+        batch_count += 1
+
+    for index in range(batch_count):
+        start = index * 10
+        end = (index + 1) * 10
+        payload = {
+            "users": users_for_email[start:end]
         }
 
-        users_for_email.append(u)
+        rest_path = 'symphony/email/template'
 
-    payload = {
-        "users": users_for_email
-    }
+        resp = sfdc.apexecute(action=rest_path, method='POST', data=payload)
 
-    rest_path = 'symphony/email/template'
-    sfdc.apexecute(action=rest_path, method='POST', data=payload)
 
 
 def send_bizops_notification():
