@@ -183,10 +183,47 @@ def update_company_sponsor(company_id: str, sponsor_id: str):
     if result != 204:
         log.error('Error updating Account sponor reference')
 
+def send_email_test():
+    user = {
+        "to": "kevinmcgr@gmail.com",
+        "cc": "templephysicist@gmail.com",
+        "bcc": "kevin.mcgrath@symphony.com",
+        "template_id": "00X1J0000013Q7p",
+        "contact_id": "0031J00001HBHqL",
+        "org_email_id": "0D21J0000000Iu4"
+    }
 
+    users = [user]
+
+    payload = {
+        "users": users
+    }
+
+    rest_path = 'symphony/email/template'
+
+    sfdc.apexecute(action=rest_path, method='POST', data=payload)
 
 def send_welcome_email(user_dict: dict):
-    pass
+    users_for_email = []
+    for u in user_dict:
+        user = {
+            "to": u.email,
+            "cc": "",
+            "bcc": "sarah@symphony.com",
+            "template_id": "00X1J0000013Q7p",
+            "contact_id": u.sfdc_id,
+            "org_email_id": "0D21J0000000Iu4"
+        }
+
+        users_for_email.append(u)
+
+    payload = {
+        "users": users_for_email
+    }
+
+    rest_path = 'symphony/email/template'
+    sfdc.apexecute(action=rest_path, method='POST', data=payload)
+
 
 def send_bizops_notification():
     pass

@@ -15,10 +15,11 @@ def import_user_data(file_path: str):
             user = ImportedUser(row)
             user.password_set = None  # sec.get_fresh_password_set()
 
-            if user.company in user_dict:
-                user_dict[user.company].append(user)
-            else:
-                user_dict[user.company] = [user]
+            if user.is_valid():
+                if user.company in user_dict:
+                    user_dict[user.company].append(user)
+                else:
+                    user_dict[user.company] = [user]
 
     logging.info('New users successfully imported.')
     return user_dict

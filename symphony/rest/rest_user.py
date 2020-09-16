@@ -35,7 +35,7 @@ class User(APIBase):
                 "firstName": first_name[:64],
                 "lastName": last_name[:64],
                 "title": title,
-                "displayName": f"{first_name[:64]} {last_name[:64]} [{company_name}]",
+                "displayName": f"{first_name[:64]} {last_name[:64]} [ {company_name} ]",
                 "userName": username,
                 "division": company_name,
                 "department": department,
