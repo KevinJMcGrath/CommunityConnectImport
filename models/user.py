@@ -56,6 +56,7 @@ class ImportedUser:
         self.sfdc_account_id = ""
         self.symphony_id = ""
         self.password_set = None
+        self.existing_user_flag: bool = False
 
     def is_valid(self):
         return self.first_name and self.last_name and self.email and self.company and self.sponsor_sfdc_id

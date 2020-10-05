@@ -42,9 +42,12 @@ def insert_users(user_list: List[ImportedUser], bot_client: BotClient):
             user_id = sym_user['userSystemInfo']['id']
         else:
             logging.info(f'User {user.email} already exsits on pod ({user_id})')
+            user.existing_user_flag = True
 
         user.symphony_id = user_id
-        user_id_list.append(user_id)
+
+        if not user.existing_user_flag:
+            user_id_list.append(user_id)
 
     return user_id_list
 

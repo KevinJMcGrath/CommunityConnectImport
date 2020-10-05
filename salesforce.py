@@ -93,10 +93,11 @@ def update_contact_symphony_ids(user_dict: Dict[str, List[ImportedUser]]):
 
     for user_list in user_dict.values():
         for user in user_list:
-            payload_list.append({
-                "Id": user.sfdc_id,
-                "Community_Pod_Id__c": user.symphony_id
-            })
+            if not user.existing_user_flag:
+                payload_list.append({
+                    "Id": user.sfdc_id,
+                    "Community_Pod_Id__c": user.symphony_id
+                })
 
     sfdc.bulk.Contact.update(payload_list)
 
