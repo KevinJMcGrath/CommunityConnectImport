@@ -20,6 +20,8 @@ def import_user_data(file_path: str):
                     user_dict[user.company].append(user)
                 else:
                     user_dict[user.company] = [user]
+            else:
+                raise ValueError(f'User {user.email} is not valid. It\'s probably the SponsorsSFDCId field header again.')
 
     logging.info('New users successfully imported.')
     return user_dict

@@ -41,17 +41,17 @@ class SingleUser:
 
 class ImportedUser:
     def __init__(self, csv_row):
-        self.first_name = csv_row.get('FirstName')
-        self.last_name = csv_row.get('LastName')
-        self.email = csv_row.get('EmailAddress')
-        self.company = csv_row.get('CompanyName')
-        self.phone = csv_row.get('Phone Number')
-        self.department = csv_row.get('Department')
-        self.title = csv_row.get('Title')
-        self.region = csv_row.get('UserRegion')
-        self.is_compliance = csv_row.get('IsComplianceOfficer')
-        self.is_support = csv_row.get('IsSupportContact')
-        self.sponsor_sfdc_id = csv_row.get('SponsorsSFDCid')
+        self.first_name = csv_row.get('FirstName').strip()
+        self.last_name = csv_row.get('LastName').strip()
+        self.email = csv_row.get('EmailAddress').strip()
+        self.company = csv_row.get('CompanyName').strip()
+        self.phone = csv_row.get('Phone Number').strip()
+        self.department = csv_row.get('Department').strip()
+        self.title = csv_row.get('Title').strip()
+        self.region = csv_row.get('UserRegion').strip()
+        self.is_compliance = csv_row.get('IsComplianceOfficer').strip()
+        self.is_support = csv_row.get('IsSupportContact').strip()
+        self.sponsor_sfdc_id = csv_row.get('SponsorsSFDCid').strip()
         self.sfdc_id = ""
         self.sfdc_account_id = ""
         self.symphony_id = ""
