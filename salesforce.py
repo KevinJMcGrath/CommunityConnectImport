@@ -217,16 +217,17 @@ def send_welcome_email(company_user_dict: dict):
 
     for _, company_users in company_user_dict.items():
         for u in company_users:
-            user = {
-                "to": u.email,
-                "cc": "",
-                "bcc": "sarah@symphony.com",
-                "template_id": "00X1J0000013Q7p",
-                "contact_id": u.sfdc_id,
-                "org_email_id": "0D21J0000000Iu4"
-            }
+            if not u.existing_user_flag:
+                user = {
+                    "to": u.email,
+                    "cc": "",
+                    "bcc": "sarah@symphony.com",
+                    "template_id": "00X1J0000013Q7p",
+                    "contact_id": u.sfdc_id,
+                    "org_email_id": "0D21J0000000Iu4"
+                }
 
-            users_for_email.append(user)
+                users_for_email.append(user)
 
     batch_count, remainder = divmod(len(users_for_email), 10)
 
