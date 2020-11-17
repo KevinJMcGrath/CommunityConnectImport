@@ -51,7 +51,7 @@ class ImportedUser:
         self.region = csv_row.get('UserRegion').strip()
         self.is_compliance = csv_row.get('IsComplianceOfficer').strip()
         self.is_support = csv_row.get('IsSupportContact').strip()
-        self.sponsor_sfdc_id = csv_row.get('SponsorsSFDCid').strip()
+        self.sponsor_sfdc_id = self.get_sfdc_id(csv_row)
         self.sfdc_id = ""
         self.sfdc_account_id = ""
         self.symphony_id = ""
@@ -60,3 +60,11 @@ class ImportedUser:
 
     def is_valid(self):
         return self.first_name and self.last_name and self.email and self.company and self.sponsor_sfdc_id
+
+    def get_sfdc_id(self, row):
+        if 'SponsorsSFDCid' in row:
+            return row.get('SponsorsSFDCid').strip()
+        elif 'SFDCid' in row:
+            return row.get('SFDCid').strip()
+        else:
+            return None

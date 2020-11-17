@@ -12,6 +12,10 @@ def import_user_data(file_path: str):
     with open(file_path, 'r', encoding='utf-8-sig') as csv_file:
         reader = csv.DictReader(csv_file)
         for row in reader:
+
+            if not row:
+                continue
+
             user = ImportedUser(row)
             user.password_set = None  # sec.get_fresh_password_set()
 
