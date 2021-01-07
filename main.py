@@ -9,6 +9,7 @@ import package_logger
 import salesforce
 import template_import
 import user_import
+import zendesk
 
 from symphony.bot_client import BotClient
 
@@ -42,6 +43,8 @@ def import_users(file_path):
 
     # salesforce.search_users_no_import(user_dict)
     salesforce.send_welcome_email(user_dict)
+
+    zendesk.add_zendesk_entries(user_dict)
 
     logging.info('New user onboarding complete.')
 

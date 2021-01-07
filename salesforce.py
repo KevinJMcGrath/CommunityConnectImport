@@ -184,7 +184,8 @@ def insert_company(company_name: str):
 
 def update_company_sponsor(company_id: str, sponsor_id: str):
     company_payload = {
-        'Symphony_CP_Sponsor__c': sponsor_id
+        'Symphony_CP_Sponsor__c': sponsor_id,
+        'Type': 'Community Connect'
     }
 
     result = sfdc.Account.update(company_id, company_payload)
@@ -249,6 +250,14 @@ def send_welcome_email(company_user_dict: dict):
 
         resp = sfdc.apexecute(action=rest_path, method='POST', data=payload)
 
+
+def get_account_name_by_id(account_id: str):
+    soql = f"SELECT Id, Name FROM Account WHERE Id = '{account_id}'"
+
+    results = sfdc.query(soql)['records']
+
+    if results:
+        return results[0]['Name']
 
 
 def send_bizops_notification():

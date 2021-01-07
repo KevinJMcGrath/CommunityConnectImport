@@ -5,3 +5,4 @@ PyJWT~=1.7.1
 simple-salesforce~=1.1.0
 cryptography~=2.9.2
 Flask~=1.1.2
+zenpy

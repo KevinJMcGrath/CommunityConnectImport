@@ -49,7 +49,7 @@ class ImportedUser:
         self.department = csv_row.get('Department').strip()
         self.title = csv_row.get('Title').strip()
         self.region = csv_row.get('UserRegion').strip()
-        self.is_compliance = csv_row.get('IsComplianceOfficer').strip()
+        self.is_compliance = csv_row.get('IsComplianceOfficer', 'FALSE').strip()
         self.is_support = csv_row.get('IsSupportContact').strip()
         self.sponsor_sfdc_id = self.get_sfdc_id(csv_row)
         self.sfdc_id = ""
