@@ -4,8 +4,8 @@
 logs/
 data/
 
-config.json.dev
-config.json
+config/config.json.dev
+config/config.json
 *.pem
 *.sqlite
 

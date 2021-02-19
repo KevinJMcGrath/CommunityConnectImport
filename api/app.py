@@ -1,22 +1,35 @@
-from flask import Flask, request, abort, jsonify, make_response
+from quart import Quart, request, abort, jsonify, make_response
 
 import api.single as single
 import api.bulk as bulk
+import api.validate as validate
 
-app = Flask(__name__)
+app = Quart(__name__)
 app.config['DEBUG'] = True
 
 # TODO: Add API Key header
 @app.route('/', methods=['GET'])
-def root():
+async def root():
     result = { "success": True }
     return jsonify(result)
 
 
 @app.route('/api/v1/user/import', methods=['POST'])
-def single_user():
+async def single_user():
+    payload = request.json
+
     if not request.json:
         abort(400)
+
+    success, error_list = validate.validate_payload(request.json)
+
+    if not success:
+        return make_response(jsonify(
+            {
+                "success": False,
+                "errors": error_list
+            }
+        ), 400)
 
     is_success, err = single.import_single_user(request.json)
 
@@ -27,7 +40,7 @@ def single_user():
 
 
 @app.route('/api/v1/bulk/import', methods=['POST'])
-def mass_import():
+async def mass_import():
     if not request.json:
         abort(400)
 

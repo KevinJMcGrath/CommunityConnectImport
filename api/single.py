@@ -1,34 +1,34 @@
-
-import config
-import salesforce
-
 from models.user import SingleUser
-from symphony.bot_client import BotClient
 
-# FirstName,LastName,EmailAddress,CompanyName,Phone Number,Department,Title,UserRegion,IsComplianceOfficer,IsSupportContact,SponsorsSFDCid
 required_params = ['firstname', 'lastname', 'email', 'phone', 'department', 'sponsor_sfdc_id', 'company']
 
 def import_single_user(payload):
-    is_success, err = verify_payload(payload)
-
-    if not is_success:
-        return False, err
-
     user = SingleUser(payload)
-    is_success, err = salesforce.import_salesforce_single_user(user)
 
-    if not is_success:
-        return False, err
+    # 1. Check for existing Account in SFDC
 
+    # 2. Create/Update SFDC Account
 
+    # 3. Check for existing Contact in SFDC
 
+    # 4. Create/Update SFDC Contact
 
-    return is_success, err
+    # 5. Check for existing user in Symphony
 
+    # 6. Add user to Symphony
 
-def verify_payload(payload):
-    for param in required_params:
-        if not payload.get(param):
-            return False, f'{param} is required.'
+    # 7. Add IB Group for company
 
-    return True, None
+    # 8. Add IB Rules
+
+    # 9. Check for existing company in Zendesk
+
+    # 10. Create/Update user in Zendesk
+
+    # 11. Check for existing user in Zendesk
+
+    # 12. Create/Update user in Zendesk
+
+    # 13. Email user
+
+    # 14. Email onboarding/support

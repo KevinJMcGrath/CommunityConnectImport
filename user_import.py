@@ -2,7 +2,7 @@ import logging
 
 from typing import List
 
-from ib_gen import InfoBarrierManager
+from symphony.ib_gen import InfoBarrierManager
 from symphony import BotClient
 from models.user import ImportedUser
 

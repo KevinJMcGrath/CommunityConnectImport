@@ -6,7 +6,7 @@ from simple_salesforce import Salesforce
 
 import config
 
-from models.user import ImportedUser
+from models.user import ImportedUser, SingleUser
 
 if config.salesforce['is_sandbox']:
     sfdc = Salesforce(username=config.salesforce['username'], password=config.salesforce['password'],
@@ -17,7 +17,7 @@ else:
 log = logging.getLogger()
 
 
-def import_salesforce_single_user(user: ImportedUser):
+def import_salesforce_single_user(user: SingleUser):
     company_id = get_company_id(user.company)
 
     if company_id:

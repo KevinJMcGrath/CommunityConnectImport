@@ -1,4 +1,4 @@
-import salesforce
+from integration import salesforce
 
 from zenpy import Zenpy
 from zenpy.lib.api_objects import Organization, User

@@ -23,17 +23,20 @@ class DBUserSession:
 
 class SingleUser:
     def __init__(self, api_payload):
+        # required fields
         self.first_name = api_payload.get('firstname')
         self.last_name = api_payload.get('lastname')
         self.email = api_payload.get('email')
-        self.company = api_payload.get('company')
+        self.company = api_payload.get('company_name')
+        self.sponsor_sfdc_id = api_payload.get('sponsor_id')
+
         self.phone = api_payload.get('phone')
         self.department = api_payload.get('department')
         self.title = api_payload.get('title', '')
         self.region = api_payload.get('region', 'AMER')
         self.is_compliance = api_payload.get('is_compliance_officer', False)
         self.is_support = api_payload.get('is_support_contact', False)
-        self.sponsor_sfdc_id = api_payload.get('sponsor_sfdc_id')
+
         self.sfdc_id = ""
         self.sfdc_account_id = ""
         self.symphony_id = ""
