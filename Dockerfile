@@ -1,7 +1,7 @@
 FROM python:3.9.2-alpine3.12
 
-RUN useradd -ms /bin/bash appuser
-USER appuser
+# RUN useradd -ms /bin/bash appuser
+# USER appuser
 
 MAINTAINER Kevin McGrath "kevin.mcgrath@symphony.com"
 
