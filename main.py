@@ -17,7 +17,8 @@ package_logger.initialize_logging()
 
 
 def run_from_config():
-    import_users(Path(config.import_path))
+    file_path = Path(config.import_path).absolute()
+    import_users(file_path=file_path)
 
 
 def import_users(file_path):

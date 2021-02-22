@@ -2,31 +2,9 @@ import logging
 
 from typing import List, Dict
 
-from simple_salesforce import Salesforce
-
-import config
+import integration
 
 from models.user import ImportedUser, SingleUser
-
-if config.salesforce['is_sandbox']:
-    sfdc = Salesforce(username=config.salesforce['username'], password=config.salesforce['password'],
-                      security_token=config.salesforce['security_token'], domain='test')
-else:
-    sfdc = Salesforce(username=config.salesforce['username'], password=config.salesforce['password'],
-                          security_token=config.salesforce['security_token'])
-log = logging.getLogger()
-
-
-def import_salesforce_single_user(user: SingleUser):
-    company_id = get_company_id(user.company)
-
-    if company_id:
-        update_company_sponsor(company_id, user.sponsor_sfdc_id)
-    else:
-        return False, 'Unable to save Account to Salesforce'
-
-    if not get_user(user, company_id):
-        return False, 'Unable to save Contact to Salesforce'
 
 
 
@@ -52,12 +30,12 @@ def get_user(user_record: ImportedUser, company_id: str):
     user_id, acct_id = search_user(user_record.email)
 
     if user_id:
-        log.info(f'{user_record.email} exists in SFDC with Id: {user_id}')
+        logging.info(f'{user_record.email} exists in SFDC with Id: {user_id}')
         user_record.sfdc_account_id = acct_id
         user_record.sfdc_id = user_id
         return True
     else:
-        log.info(f'Creating Contact for email address: {user_record.email}')
+        logging.info(f'Creating Contact for email address: {user_record.email}')
         return insert_user(user_record, company_id)
 
 
@@ -70,7 +48,7 @@ def insert_user(user_record: ImportedUser, company_id: str):
         "Email": user_record.email
     }
 
-    result = sfdc.Contact.create(user_payload)
+    result = integration.sfdc_client.internal_client.Contact.create(user_payload)
 
     if result['success']:
         user_record.sfdc_id = result['id']
@@ -80,15 +58,15 @@ def insert_user(user_record: ImportedUser, company_id: str):
 
         return True
     else:
-        log.error('Error creating Contact')
+        logging.error('Error creating Contact')
         for err in result['errors']:
-            log.error(err)
+            logging.error(err)
 
         return None
 
 
 def update_contact_symphony_ids(user_dict: Dict[str, List[ImportedUser]]):
-    log.info('Updating Contacts with Community Connect Ids')
+    logging.info('Updating Contacts with Community Connect Ids')
     payload_list = []
 
     for user_list in user_dict.values():
@@ -99,16 +77,16 @@ def update_contact_symphony_ids(user_dict: Dict[str, List[ImportedUser]]):
                     "Community_Pod_Id__c": user.symphony_id
                 })
 
-    sfdc.bulk.Contact.update(payload_list)
+    integration.sfdc_client.internal_client.bulk.Contact.update(payload_list)
 
 def add_contact_roles(user_record: ImportedUser):
     pass
 
-
+@integration.sfdc_connection_check
 def search_user(email_address: str):
     soql = f"SELECT Id, AccountId FROM Contact WHERE Email ='{email_address}'"
 
-    results = sfdc.query(soql)['records']
+    results = integration.sfdc_client.internal_client.query(soql)['records']
 
     if results:
         record = results[0]
@@ -126,42 +104,62 @@ def search_users_no_import(company_user_dict):
 
 
 def get_company_id(company_name: str):
-    # company_id = company_search(company_name)
     company_id = company_query(company_name)
 
     if not company_id:
-        log.info(f'{company_name} does not exist. Creating Account in Salesforce.')
+        logging.info(f'{company_name} does not exist. Creating Account in Salesforce.')
         company_id = insert_company(company_name)
 
 
     return company_id
 
 
+
+@integration.sfdc_connection_check
+def contact_query(email: str):
+    soql = f"SELECT Id FROM Contact WHERE Email = '{email}'"
+
+    results = integration.sfdc_client.internal_client.query(soql)['records']
+
+    if results:
+        return results[0]['Id']
+
+
+@integration.sfdc_connection_check
 def company_query(company_name: str):
     soql = f"SELECT Id FROM Account WHERE Name = '{company_name}'"
 
-    results = sfdc.query(soql)['records']
+    results = integration.sfdc_client.internal_client.query(soql)['records']
 
     if results:
-        record = results[0]
-        return record['Id']
-
-    return None
+        return results[0]['Id']
 
 
+@integration.sfdc_connection_check
 def company_search(company_name: str):
     # sosl_query = 'FIND {' + company_name + '} IN NAME FIELDS RETURNING Account(Id, Name)'
-    results = sfdc.quick_search(company_name)['searchRecords']
+    results = integration.sfdc_client.internal_client.quick_search(company_name)['searchRecords']
 
     for res in results:
         if res['attributes']['type'] == 'Account':
             sfdc_id = res['Id']
-            log.info(f'{company_name} found in Salesforce - Id: {sfdc_id}')
+            logging.info(f'{company_name} found in Salesforce - Id: {sfdc_id}')
             return sfdc_id
 
     return None
 
 
+@integration.sfdc_connection_check
+def get_account_name_by_id(account_id: str):
+    soql = f"SELECT Id, Name FROM Account WHERE Id = '{account_id}'"
+
+    results = integration.sfdc_client.internal_client.query(soql)['records']
+
+    if results:
+        return results[0]['Name']
+
+
+@integration.sfdc_connection_check
 def insert_company(company_name: str):
     company_payload = {
         'Name': company_name,
@@ -171,28 +169,49 @@ def insert_company(company_name: str):
         'Financial_Services_Category__c': 'Buy Side'
     }
 
-    result = sfdc.Account.create(company_payload)
+    result = integration.sfdc_client.internal_client.Account.create(company_payload)
 
     if result['success']:
         return result['id']
     else:
-        log.error('Error creating account')
+        logging.error('Error creating account')
         for err in result['errors']:
-            log.error(err)
+            logging.error(err)
 
         return None
 
+@integration.sfdc_connection_check
+def insert_contact(account_id: str, firstname: str, lastname: str, email: str):
+    contact_payload = {
+        "AccountId": account_id,
+        "Firstname": firstname,
+        "Lastname": lastname,
+        "Email": email
+    }
+
+    result = integration.sfdc_client.internal_client.Contact.create(contact_payload)
+
+    if result['success']:
+        return result['id']
+    else:
+        logging.error('Error creating account')
+        for err in result['errors']:
+            logging.error(err)
+
+
+@integration.sfdc_connection_check
 def update_company_sponsor(company_id: str, sponsor_id: str):
     company_payload = {
         'Symphony_CP_Sponsor__c': sponsor_id,
         'Type': 'Community Connect'
     }
 
-    result = sfdc.Account.update(company_id, company_payload)
+    result = integration.sfdc_client.internal_client.Account.update(company_id, company_payload)
 
     if result != 204:
-        log.error('Error updating Account sponor reference')
+        logging.error('Error updating Account sponor reference')
 
+@integration.sfdc_connection_check
 def send_email_test():
     user = {
         "to": "kevinmcgr@gmail.com",
@@ -211,8 +230,10 @@ def send_email_test():
 
     rest_path = 'symphony/email/template'
 
-    sfdc.apexecute(action=rest_path, method='POST', data=payload)
+    integration.sfdc_client.internal_client.apexecute(action=rest_path, method='POST', data=payload)
 
+
+@integration.sfdc_connection_check
 def send_welcome_email(company_user_dict: dict):
     users_for_email = []
 
@@ -248,16 +269,10 @@ def send_welcome_email(company_user_dict: dict):
 
         rest_path = 'symphony/email/template'
 
-        resp = sfdc.apexecute(action=rest_path, method='POST', data=payload)
+        resp = integration.sfdc_client.internal_client.apexecute(action=rest_path, method='POST', data=payload)
 
 
-def get_account_name_by_id(account_id: str):
-    soql = f"SELECT Id, Name FROM Account WHERE Id = '{account_id}'"
 
-    results = sfdc.query(soql)['records']
-
-    if results:
-        return results[0]['Name']
 
 
 def send_bizops_notification():

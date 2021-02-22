@@ -68,7 +68,7 @@ def authenticate_bot_by_keystring(base_url: str, bot_username: str, private_key:
 
 def authenticate_bot(base_url: str, jwt_token):
     jwt_payload = {
-        "token": jwt_token.decode('utf-8')
+        "token": jwt_token
     }
 
     session_ep = base_url + endpoints.session_auth_jwt()

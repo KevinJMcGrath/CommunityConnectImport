@@ -7,8 +7,6 @@ from symphony import BotClient
 from models.user import ImportedUser
 
 
-logging.getLogger()
-
 def onboard_users(user_dict: dict, bot_client: BotClient):
     ibm = InfoBarrierManager(bot_client)
 
