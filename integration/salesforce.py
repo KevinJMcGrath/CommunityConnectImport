@@ -246,14 +246,16 @@ def send_email_test():
 
 @integration.sfdc_connection_check
 def send_single_welcome_email(email: str, contact_id: str):
-    payload = [{
-        "to": email,
-        "cc": "",
-        "bcc": "sarah@symphony.com",
-        "template_id": "00X1J0000013Q7p",
-        "contact_id": contact_id,
-        "org_email_id": "0D21J0000000Iu4"
-    }]
+    payload = {
+        "users": [{
+            "to": email,
+            "cc": "",
+            "bcc": "sarah@symphony.com",
+            "template_id": "00X1J0000013Q7p",
+            "contact_id": contact_id,
+            "org_email_id": "0D21J0000000Iu4"
+        }]
+    }
 
     rest_path = 'symphony/email/template'
 

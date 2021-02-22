@@ -51,13 +51,18 @@ class InfoBarrierManager:
 
             return list(self.ib_groups.keys())[list(self.ib_groups.values()).index(group_name)]
         else:
-            logging.info(f'Creating IB group with name {group_name}')
             ib_group_id = self.create_ib_group(group_name)
             self.ib_groups[ib_group_id] = group_name
 
             return ib_group_id
 
+    def get_existing_ib_group(self, group_name):
+        if group_name in self.ib_groups.values():
+            logging.info(f'IB Group {group_name} found in pod')
+            return list(self.ib_groups.keys())[list(self.ib_groups.values()).index(group_name)]
+
     def create_ib_group(self, group_name: str):
+        logging.info(f'Creating IB group with name {group_name}')
         return self.client.InfoBarriers.create_ib_user_group(group_name)['data']['id']
 
     def add_users_to_ib_group(self, group_id: str, user_ids: list):

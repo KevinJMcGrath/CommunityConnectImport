@@ -40,18 +40,28 @@ def import_single_user(payload):
                                                  user.email, user.company, title=user.title,
                                                  department=user.department)
 
+        logging.info(f'Updating Contact {contact_id} with Community Connect id {sym_user_id}')
         salesforce.update_contact_symphony_id(contact_id, sym_user_id)
 
         # 7. Add IB Group for company
         cname = user.company.strip().replace(' ', '_')
         group_name = f"cc_{cname}"
-        ib_group_id = ibm.get_ib_group_id(group_name)
+        # ib_group_id = ibm.get_ib_group_id(group_name)
+        is_existing_ib_group = True
+        ib_group_id = ibm.get_existing_ib_group(group_name)
+
+        if not ib_group_id:
+            ib_group_id = ibm.create_ib_group(group_name)
+            is_existing_ib_group = False
 
         # 8. Add User to IB Group
         ibm.add_users_to_ib_group(group_id=ib_group_id, user_ids=[sym_user_id])
 
         # 9. Add IB policy combinations
-        ibm.create_all_policy_combinations(ib_group_id)
+        if is_existing_ib_group:
+            logging.info('IB Group exists. Skipping policy creation')
+        else:
+            ibm.create_all_policy_combinations(ib_group_id)
 
         # 10. Create/Update user in Zendesk
         sponsor_company_name = salesforce.get_account_name_by_id(user.sponsor_sfdc_id)
