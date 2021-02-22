@@ -14,6 +14,7 @@ pod_company_name = _config['pod_company_name']
 bot_config = _config['bot_config']
 salesforce = _config['salesforce']
 zendesk = _config['zendesk']
+sendgrid = _config['sendgrid']
 
 LogConfig = LogType(_config['logging'])
 

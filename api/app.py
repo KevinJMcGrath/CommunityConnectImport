@@ -16,12 +16,12 @@ async def root():
 
 @app.route('/api/v1/user/import', methods=['POST'])
 async def single_user():
-    payload = request.json
+    payload = await request.get_json()
 
-    if not request.json:
+    if not payload:
         abort(400)
 
-    success, error_list = validate.validate_payload(request.json)
+    success, error_list = validate.validate_payload(payload)
 
     if not success:
         return make_response(jsonify(
@@ -31,21 +31,23 @@ async def single_user():
             }
         ), 400)
 
-    is_success, err = single.import_single_user(request.json)
+    is_success, err = single.import_single_user(payload)
 
     if not is_success:
-        return make_response(jsonify({'success': False, 'message': f'Error: {err}'}), 400)
+        return make_response(jsonify({'success': False, 'message': err}), 400)
     else:
         return jsonify({'success': True}), 201
 
 
 @app.route('/api/v1/bulk/import', methods=['POST'])
 async def mass_import():
-    if not request.json:
+    payload = request.get_json()
+
+    if not payload:
         abort(400)
 
     # This will actually take a CSV, not JSON.
-    is_success, err = bulk.bulk_import_users(request.json)
+    is_success, err = bulk.bulk_import_users(payload)
 
     if not is_success:
         return make_response(jsonify({'success': False, 'message': f'Error: {err}'}), 400)

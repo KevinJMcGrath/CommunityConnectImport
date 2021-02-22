@@ -64,7 +64,7 @@ def insert_user(user_record: ImportedUser, company_id: str):
 
         return None
 
-
+@integration.sfdc_connection_check
 def update_contact_symphony_ids(user_dict: Dict[str, List[ImportedUser]]):
     logging.info('Updating Contacts with Community Connect Ids')
     payload_list = []
@@ -78,6 +78,17 @@ def update_contact_symphony_ids(user_dict: Dict[str, List[ImportedUser]]):
                 })
 
     integration.sfdc_client.internal_client.bulk.Contact.update(payload_list)
+
+
+@integration.sfdc_connection_check
+def update_contact_symphony_id(contact_id: str, symphony_user_id: str):
+    logging.info('Updating Contact with Community Connect user id')
+
+    payload = {
+        "Community_Pod_Id__c": symphony_user_id
+    }
+
+    integration.sfdc_client.internal_client.Contact.update(contact_id, payload)
 
 def add_contact_roles(user_record: ImportedUser):
     pass
@@ -234,6 +245,21 @@ def send_email_test():
 
 
 @integration.sfdc_connection_check
+def send_single_welcome_email(email: str, contact_id: str):
+    payload = [{
+        "to": email,
+        "cc": "",
+        "bcc": "sarah@symphony.com",
+        "template_id": "00X1J0000013Q7p",
+        "contact_id": contact_id,
+        "org_email_id": "0D21J0000000Iu4"
+    }]
+
+    rest_path = 'symphony/email/template'
+
+    resp = integration.sfdc_client.internal_client.apexecute(action=rest_path, method='POST', data=payload)
+
+@integration.sfdc_connection_check
 def send_welcome_email(company_user_dict: dict):
     users_for_email = []
 
@@ -270,9 +296,6 @@ def send_welcome_email(company_user_dict: dict):
         rest_path = 'symphony/email/template'
 
         resp = integration.sfdc_client.internal_client.apexecute(action=rest_path, method='POST', data=payload)
-
-
-
 
 
 def send_bizops_notification():

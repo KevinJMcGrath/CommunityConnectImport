@@ -18,6 +18,14 @@
     "security_token": "1234567890abcdefghijk",
     "is_sandbox": false
   },
+  "zendesk": {
+    "email": "my_email@bob.com",
+    "token": "1122334455",
+    "subdomain": "myco12"
+  },
+  "sendgrid": {
+    "api_token": "11223344"
+  },
     "logging": {
     "log_to_file": false,
     "log_path": "./logs",

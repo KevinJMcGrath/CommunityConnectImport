@@ -46,6 +46,7 @@ def run_api():
 
 
 if __name__ == "__main__":
+    print('Running')
     parser = OptionParser()
     parser.add_option("-f", "--file", help="Specify the input CSV for adding to Symphony", dest="file_path",
                       default=None, type='string', action="store")
@@ -54,9 +55,9 @@ if __name__ == "__main__":
 
     options, args = parser.parse_args()
 
-    if not options:
-        run_api()
-    elif options.file_path:
+    if options.file_path:
         import_users(options.file_path)
     elif options.is_config:
         run_from_config()
+    else:
+        run_api()
