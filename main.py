@@ -15,6 +15,8 @@ from symphony.bot_client import BotClient
 
 package_logger.initialize_logging()
 
+app = api.app
+
 
 def run_from_config():
     file_path = Path(config.import_path).absolute()
