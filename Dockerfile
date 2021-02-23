@@ -1,7 +1,4 @@
-FROM python:3.9.2-alpine3.12
-
-# RUN useradd -ms /bin/bash appuser
-# USER appuser
+FROM python:3.9.2-slim-buster
 
 MAINTAINER Kevin McGrath "kevin.mcgrath@symphony.com"
 
@@ -10,4 +7,7 @@ RUN pip install -r /app/requirements.txt
 
 ADD . /app
 
-CMD ["hypercorn", "-b", "0.0.0.0:8080", "main:app"]
+RUN useradd -ms /bin/bash appuser
+USER appuser
+
+CMD ["hypercorn", "-b", "0.0.0.0:8080", "app/main:app"]

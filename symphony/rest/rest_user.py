@@ -57,7 +57,9 @@ class User(APIBase):
 
         ep = self.get_endpoint(sym_ep.create_user())
 
-        return self.post(ep, user)
+        resp = self.post(ep, user)
+
+        return resp['userSystemInfo']['id']
 
     def create_service_user(self, first_name: str, last_name: str, email: str, username: str, company_name: str,
                             public_key: str):
