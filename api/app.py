@@ -12,10 +12,9 @@ app = Quart(__name__)
 app.config['DEBUG'] = True
 
 # TODO: Add API Key header
-@app.route('/', methods=['GET'])
+@app.route('/api/v1/status', methods=['GET'])
 async def root():
-    result = { "success": True }
-    return jsonify(result)
+    return { "success": True }
 
 
 @app.route('/api/v1/user/import', methods=['POST'])
