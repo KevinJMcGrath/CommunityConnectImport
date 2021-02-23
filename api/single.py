@@ -17,6 +17,11 @@ def import_single_user(payload):
         ibm = InfoBarrierManager(sym_client)
         domain = user.email.split('@')[1].lower()
 
+        # 0. Check to make
+        sponsor_company_name = salesforce.get_account_name_by_id(user.sponsor_sfdc_id)
+        if not sponsor_company_name:
+            return False, 'Invalid sponsor account'
+
         # 1. Check for existing Account in SFDC
         # 2. Create/Update SFDC Account
         logging.info(f'Get/Create SFDC Cccount for {user.company}')
@@ -75,7 +80,6 @@ def import_single_user(payload):
             ibm.create_all_policy_combinations(ib_group_id)
 
         # 10. Create/Update user in Zendesk
-        sponsor_company_name = salesforce.get_account_name_by_id(user.sponsor_sfdc_id)
         logging.info(f'Get/Create Zendesk Org')
         zen_company = zen.get_or_add_org(user.company, domain=domain, sponsor_name=sponsor_company_name)
         zen_company_id = zen_company.id
