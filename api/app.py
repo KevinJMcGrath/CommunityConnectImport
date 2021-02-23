@@ -44,7 +44,7 @@ async def single_user():
     is_success, err = single.import_single_user(payload)
 
     if not is_success:
-        return{"success": False, "message": err}, 400
+        return{"success": False, "message": err}, 500
     else:
         return {'success': True}
 
@@ -66,7 +66,7 @@ async def mass_import():
     is_success, err = bulk.bulk_import_users(payload)
 
     if not is_success:
-        return{"success": False, "message": err}, 400
+        return{"success": False, "message": err}, 500
     else:
         return {"success": True}
 
