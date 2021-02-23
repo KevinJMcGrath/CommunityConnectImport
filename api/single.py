@@ -19,23 +19,30 @@ def import_single_user(payload):
 
         # 1. Check for existing Account in SFDC
         # 2. Create/Update SFDC Account
+        logging.info(f'Get/Create SFDC Cccount for {user.company}')
         account_id = salesforce.get_company_id(user.company)
+
+        logging.info(f'Updating Account Sponsor. Account Id: {account_id} Sponsor Id: {user.sponsor_sfdc_id}')
         salesforce.update_company_sponsor(company_id=account_id, sponsor_id=user.sponsor_sfdc_id)
 
         # 3. Check for existing Contact in SFDC
+        logging.info(f'Get SFDC Contact for {user.email}')
         contact_id = salesforce.contact_query(user.email)
 
         # 4. Create/Update SFDC Contact
         if not contact_id:
+            logging.info(f'Contact does not exist. Creating Contact.')
             contact_id = salesforce.insert_contact(account_id=account_id, firstname=user.first_name,
                                                    lastname=user.last_name, email=user.email)
 
 
         # 5. Check for existing user in Symphony
+        logging.info(f'Get Symphony user Id for {user.email}')
         sym_user_id = sym_client.User.lookup_user_id(user.email)
 
         # 6. Add user to Symphony
         if not sym_user_id:
+            logging.info(f'Symphony user does not exist. Creating.')
             sym_user_id = sym_client.User.create_symphony_user(user.first_name, user.last_name, user.email,
                                                  user.email, user.company, title=user.title,
                                                  department=user.department)
@@ -46,33 +53,40 @@ def import_single_user(payload):
         # 7. Add IB Group for company
         cname = user.company.strip().replace(' ', '_')
         group_name = f"cc_{cname}"
-        # ib_group_id = ibm.get_ib_group_id(group_name)
+
         is_existing_ib_group = True
+        logging.info(f'Getting Info Barrior group id for {group_name}')
         ib_group_id = ibm.get_existing_ib_group(group_name)
 
         if not ib_group_id:
+            logging.info(f'IB Group does not exist. Creating.')
             ib_group_id = ibm.create_ib_group(group_name)
             is_existing_ib_group = False
 
         # 8. Add User to IB Group
+        logging.info(f'Adding user to IB Group')
         ibm.add_users_to_ib_group(group_id=ib_group_id, user_ids=[sym_user_id])
 
         # 9. Add IB policy combinations
         if is_existing_ib_group:
-            logging.info('IB Group exists. Skipping policy creation')
+            logging.info('IB Group previously existed. Skipping policy creation')
         else:
+            logging.info('Creating IB Group policy combinations')
             ibm.create_all_policy_combinations(ib_group_id)
 
         # 10. Create/Update user in Zendesk
         sponsor_company_name = salesforce.get_account_name_by_id(user.sponsor_sfdc_id)
+        logging.info(f'Get/Create Zendesk Org')
         zen_company = zen.get_or_add_org(user.company, domain=domain, sponsor_name=sponsor_company_name)
         zen_company_id = zen_company.id
 
         # 11. Create/Update user in Zendesk
+        logging.info(f'Get/Create Zendesk User')
         zen_user = zen.get_or_add_user(fullname=f'{user.first_name} {user.last_name}', email=user.email,
                                           org_id=zen_company_id)
 
         # 13. Email user
+        logging.info('Sending user welcome email')
         salesforce.send_single_welcome_email(email=user.email, contact_id=contact_id)
 
         # 14. Email onboarding/support
