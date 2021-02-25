@@ -69,5 +69,21 @@ async def mass_import():
     else:
         return {"success": True}
 
+
+@app.route('/api/v1/bulk/signup', methods=['POST'])
+async def mass_signup():
+    api_key = request.headers.get('X-SYM-COMCON')
+
+    if not api_key or api_key.lower() != config.api_key.lower():
+        logging.error('Invalid API Key')
+        return {"success": False, "message": "Invalid API Key"}, 401
+
+    payload = request.get_json()
+
+    if not payload:
+        abort(400)
+
+    return {"success": True}
+
 def start_app():
     app.run()
