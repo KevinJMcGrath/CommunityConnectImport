@@ -1,8 +1,6 @@
 import logging.handlers
 import sys
 
-from pathlib import Path
-
 import config
 
 # Log Filter class
@@ -31,12 +29,6 @@ formatter.datefmt = '%m/%d %H:%M:%S'
 def initialize_logging():
     # Define the logging handlers
     if config.LogConfig.verbose:
-        console_handler = logging.StreamHandler(stream=sys.stdout)
-        console_handler.setLevel(logging.INFO)
-        console_handler.setFormatter(logging.Formatter('%(message)s'))
-        console_handler.addFilter(LogFilter(logging.INFO))
-        root_logger.addHandler(console_handler)
-
         debug_handler = logging.StreamHandler(stream=sys.stdout)
         debug_handler.setLevel(logging.DEBUG)
         debug_handler.setFormatter(formatter)
