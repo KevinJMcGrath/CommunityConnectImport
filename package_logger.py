@@ -18,7 +18,7 @@ class LogFilter(logging.Filter):
 root_logger = logging.getLogger('')
 
 log_level = logging.DEBUG if config.LogConfig.verbose else logging.INFO
-root_logger.setLevel(logging.DEBUG)
+root_logger.setLevel(log_level)
 
 
 # Log Formatting
@@ -27,6 +27,11 @@ formatter.datefmt = '%m/%d %H:%M:%S'
 
 
 def initialize_logging():
+    if root_logger.hasHandlers():
+        print('Removing default log handler...')
+        h = root_logger.handlers[0]
+        root_logger.removeHandler(h)
+
     # Define the logging handlers
     if config.LogConfig.verbose:
         debug_handler = logging.StreamHandler(stream=sys.stdout)
@@ -38,7 +43,7 @@ def initialize_logging():
     info_handler = logging.StreamHandler(stream=sys.stdout)
     info_handler.setLevel(logging.INFO)
     info_handler.setFormatter(formatter)
-    info_handler.addFilter(LogFilter(logging.WARN))
+    info_handler.addFilter(LogFilter(logging.INFO))
     root_logger.addHandler(info_handler)
 
     error_handler = logging.StreamHandler(stream=sys.stderr)

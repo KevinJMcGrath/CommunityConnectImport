@@ -4,8 +4,7 @@ from typing import List, Dict
 
 import integration
 
-from models.user import ImportedUser, SingleUser
-
+from models.user import ImportedUser
 
 
 def import_salesforce_users(user_dict: dict):
@@ -39,7 +38,7 @@ def get_user(user_record: ImportedUser, company_id: str):
         return insert_user(user_record, company_id)
 
 
-
+@integration.sfdc_connection_check
 def insert_user(user_record: ImportedUser, company_id: str):
     user_payload = {
         "AccountId": company_id,
@@ -121,9 +120,7 @@ def get_company_id(company_name: str):
         logging.info(f'{company_name} does not exist. Creating Account in Salesforce.')
         company_id = insert_company(company_name)
 
-
     return company_id
-
 
 
 @integration.sfdc_connection_check
@@ -217,10 +214,8 @@ def update_company_sponsor(company_id: str, sponsor_id: str):
         'Type': 'Community Connect'
     }
 
-    result = integration.sfdc_client.internal_client.Account.update(company_id, company_payload)
+    return integration.sfdc_client.internal_client.Account.update(company_id, company_payload)
 
-    if result != 204:
-        logging.error('Error updating Account sponor reference')
 
 @integration.sfdc_connection_check
 def send_email_test():
@@ -271,10 +266,10 @@ def send_welcome_email(company_user_dict: dict):
                 user = {
                     "to": u.email,
                     "cc": "",
-                    "bcc": "sarah@symphony.com",
+                    "bcc": "sarah@symphony.com",  # Community Connect > Onboarding
                     "template_id": "00X1J0000013Q7p",
                     "contact_id": u.sfdc_id,
-                    "org_email_id": "0D21J0000000Iu4"
+                    "org_email_id": "0D21J0000000Iu4"  # sales@symphony.com Org-Wide Email
                 }
 
                 users_for_email.append(user)

@@ -14,13 +14,13 @@ class InfoBarrierManager:
         # This takes waaaaaaaaay too long coming back from the pod.
         # self.populate_existing_ib_policies()
 
-    def populate_existing_ib_policies(self):
-        logging.info('Caching info barrier policies...')
-        policy_resp = self.client.InfoBarriers.list_ib_policies()
-
-        for pol in policy_resp:
-            key = f'{pol["groups"][0]}_{pol["groups"][0]}'
-            self.ib_policies.add(key)
+    # def populate_existing_ib_policies(self):
+    #     logging.info('Caching info barrier policies...')
+    #     policy_resp = self.client.InfoBarriers.list_ib_policies()
+    #
+    #     for pol in policy_resp:
+    #         key = f'{pol["groups"][0]}_{pol["groups"][0]}'
+    #         self.ib_policies.add(key)
 
     def populate_existing_ib_groups(self, filter_prefix: str = None):
         logging.info('Caching info barrier groups...')
@@ -58,22 +58,18 @@ class InfoBarrierManager:
 
     def get_existing_ib_group(self, group_name):
         if group_name in self.ib_groups.values():
-            logging.info(f'IB Group {group_name} found in pod')
             return list(self.ib_groups.keys())[list(self.ib_groups.values()).index(group_name)]
 
     def create_ib_group(self, group_name: str):
-        logging.info(f'Creating IB group with name {group_name}')
         return self.client.InfoBarriers.create_ib_user_group(group_name)['data']['id']
 
     def add_users_to_ib_group(self, group_id: str, user_ids: list):
-        logging.info(f'Adding users to IB Group Id {group_id}...')
         self.client.InfoBarriers.add_users_to_ib_group(group_id, user_ids)
 
     def create_ib_group_policy(self, group_1_id: str, group_2_id: str):
         return self.client.InfoBarriers.create_ib_policy(group_1_id, group_2_id)['data']['id']
 
     def create_all_policy_combinations(self, new_group_id: str):
-        logging.info('Generating IB Policy combinations...')
         added_policy_count = 0
         existing_policy_count = 0
         for group_id in self.ib_groups:

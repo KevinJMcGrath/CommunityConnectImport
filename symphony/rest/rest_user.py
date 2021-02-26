@@ -11,9 +11,9 @@ class User(APIBase):
     def __init__(self, session):
         super().__init__(session)
 
+    # TODO: Need to implement a cache for user lookup
     def lookup_user_id(self, email: str):
         ep = self.get_endpoint(sym_ep.lookup_user(email))
-
         user_list = self.get(ep)
 
         if user_list:

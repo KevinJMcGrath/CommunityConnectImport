@@ -1,3 +1,4 @@
+import asyncio
 import logging
 
 from quart import Quart, request, abort, jsonify, make_response
@@ -5,8 +6,9 @@ from quart import Quart, request, abort, jsonify, make_response
 import api.single as single
 import api.bulk as bulk
 import api.validate as validate
-
 import config
+
+
 
 app = Quart(__name__)
 app.config['DEBUG'] = True
@@ -19,33 +21,26 @@ async def root():
 
 @app.route('/api/v1/user/import', methods=['POST'])
 async def single_user():
-    api_key = request.headers.get('X-SYM-COMCON')
-
-    if not api_key or api_key.lower() != config.api_key.lower():
-        logging.error('Invalid API Key')
+    if not validate.validate_api_key(api_request=request):
         return {"success": False, "message": "Invalid API Key"}, 401
 
-    payload = await request.get_json()
+    user = await validate.validate_single_payload(api_request=request)
 
-    if not payload:
-        abort(400)
+    if not user:
+        err_msg = 'Unable to create user on Community Connect Service. Please contact support. CODE: 153-22'
+        return {"success": False, "message": err_msg}, 400
 
-    success, error_list = validate.validate_payload(payload)
+    if not single.check_sponsor_name(user):
+        return {"success": False, "message": "Your sponsor id was invalid. Please contact support. CODE: 830-18"}
 
-    if not success:
-        return make_response(jsonify(
-            {
-                "success": False,
-                "errors": error_list
-            }
-        ), 400)
+    sym_id, err_msg = single.add_comcon_user(user)
 
-    is_success, err = single.import_single_user(payload)
-
-    if not is_success:
-        return{"success": False, "message": err}, 500
-    else:
+    if sym_id:
+        asyncio.get_running_loop().run_in_executor(None, single.finalize_user, user, sym_id)
         return {'success': True}
+    else:
+        return {"success": False, "message": err_msg}, 500
+
 
 
 @app.route('/api/v1/bulk/import', methods=['POST'])

@@ -1,10 +1,16 @@
+import logging
+
+import config
+
+from models.user import SingleUser
+
 
 # FirstName,LastName,EmailAddress,CompanyName,Phone Number,Department,Title,UserRegion,IsComplianceOfficer,IsSupportContact,SponsorsSFDCid
 req_fields = ['firstname', 'lastname', 'email', 'sponsor_id', 'company_name']
 
-def validate_payload(inbound_json: dict) -> (bool, list):
+async def validate_single_payload(api_request) -> (bool, list):
     """
-    :param inbound_json: Inbound JSON payload containing the Community Connect user details.
+    :param api_request: Inbound request object containing the Community Connect user details.
         The following fields are required:
             firstname
             lastname
@@ -23,20 +29,42 @@ def validate_payload(inbound_json: dict) -> (bool, list):
     """
     success = True
 
+    err_msg = ''
     missing_fields = []
     missing_values = []
-    for field_name in req_fields:
-        if field_name not in inbound_json:
-            missing_fields.append(field_name)
-        elif not inbound_json[field_name]:
-            missing_values.append(field_name)
 
-    error_list = []
+    payload = await api_request.get_json()
+
+    if not payload:
+        logging.error('Inbound payload empty. Cannot proceed with user creation.')
+        return False
+
+
+    is_valid = True
+    for field_name in req_fields:
+        if field_name not in payload:
+            missing_fields.append(field_name)
+            is_valid = False
+        elif not payload[field_name]:
+            missing_values.append(field_name)
+            is_valid = False
 
     if missing_fields:
-        error_list.append(f"The following fields are missing from the payload: {','.join(missing_fields)}")
+        err_msg = "The following fields are missing from the payload: {','.join(missing_fields)}"
+    elif missing_values:
+        err_msg = f"The following fields are missing values: {','.join(missing_values)}"
 
-    if missing_values:
-        error_list.append(f"The following fields are missing values: {','.join(missing_values)}")
+    if is_valid:
+        return SingleUser(payload)
+    else:
+        logging.error(err_msg)
+        return False
 
-    return success, error_list
+
+def validate_api_key(api_request):
+    api_key = api_request.headers.get('X-SYM-COMCON')
+
+    if not api_key or api_key.lower() != config.api_key.lower():
+        return False
+
+    return True
