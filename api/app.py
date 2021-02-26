@@ -45,19 +45,13 @@ async def single_user():
 
 @app.route('/api/v1/bulk/import', methods=['POST'])
 async def mass_import():
-    api_key = request.headers.get('X-SYM-COMCON')
-
-    if not api_key or api_key.lower() != config.api_key.lower():
-        logging.error('Invalid API Key')
+    if not validate.validate_api_key(api_request=request):
         return {"success": False, "message": "Invalid API Key"}, 401
 
-    payload = request.get_json()
-
-    if not payload:
-        abort(400)
+    user_list = await validate.validate_bulk_payload(api_request=request)
 
     # This will actually take a CSV, not JSON.
-    is_success, err = bulk.bulk_import_users(payload)
+    is_success, err = bulk.bulk_import_users(user_list)
 
     if not is_success:
         return{"success": False, "message": err}, 500

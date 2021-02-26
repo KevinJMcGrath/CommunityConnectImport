@@ -8,7 +8,21 @@ from models.user import SingleUser
 # FirstName,LastName,EmailAddress,CompanyName,Phone Number,Department,Title,UserRegion,IsComplianceOfficer,IsSupportContact,SponsorsSFDCid
 req_fields = ['firstname', 'lastname', 'email', 'sponsor_id', 'company_name']
 
-async def validate_single_payload(api_request) -> (bool, list):
+
+async def validate_bulk_payload(api_request):
+    payload = await api_request.get_json()
+
+    if not payload:
+        logging.error('Inbound payload empty. Cannot proceed with user creation.')
+        return False
+
+    user_list = []
+    for u in payload:
+        user_list.append(SingleUser(u))
+
+    return user_list
+
+async def validate_single_payload(api_request):
     """
     :param api_request: Inbound request object containing the Community Connect user details.
         The following fields are required:
@@ -23,12 +37,8 @@ async def validate_single_payload(api_request) -> (bool, list):
             title
             is_support_contact
             is_compliance_officer
-    :return: Returns a (bool, list) tuple.
-        success: The payload was validated
-        error_list: If the payload has validation errors, they are contained here and can be passed to the client
+    :return: model.user.SingleUser class if validation succeeds
     """
-    success = True
-
     err_msg = ''
     missing_fields = []
     missing_values = []
