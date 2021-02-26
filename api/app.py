@@ -28,10 +28,10 @@ async def single_user():
 
     if not user:
         err_msg = 'Unable to create user on Community Connect Service. Please contact support. CODE: 153-22'
-        return {"success": False, "message": err_msg}, 400
+        return {"success": False, "message": err_msg}, 500
 
     if not single.check_sponsor_name(user):
-        return {"success": False, "message": "Your sponsor id was invalid. Please contact support. CODE: 830-18"}
+        return {"success": False, "message": "Your sponsor id was invalid. Please contact support. CODE: 830-18"}, 500
 
     sym_id, err_msg = single.add_comcon_user(user)
 

@@ -223,4 +223,6 @@ def sg_send_internal_notification(first_name: str, last_name: str, email: str, c
             <p>User has been sent the Welcome notification and all Salesforce and Zendesk records have been created.</p>
         </body></html>
     """
-    sg.send_email(from_address='onboarding@symphony.com', to_addresses=[''], subject=subj, body_html=body)
+
+    to_adds = ['kevin.mcgrath@symphony.com', 'miguel.clark@symphony.com', 'sharon.hackett@symphony.com']
+    sg.send_email(from_address='onboarding@symphony.com', to_addresses=to_adds, subject=subj, body_html=body)
