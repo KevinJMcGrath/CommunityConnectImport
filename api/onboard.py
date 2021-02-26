@@ -140,9 +140,9 @@ def sym_user_create(symphony_client: BotClient, firstname: str, lastname: str, e
     logging.info(f'Creating Symphony user for email {email_address} under company name {company_name}')
 
     try:
-        return symphony_client.User.create_symphony_user(first_name=firstname, last_name=lastname,
-                                                                email=email_address, company_name=company_name,
-                                                                title=title, department=department)
+        return symphony_client.User.create_symphony_user(first_name=firstname, last_name=lastname, email=email_address,
+                                                         username=email_address, company_name=company_name, title=title,
+                                                         department=department)
     except Exception as ex:
         sym_err_log.exception(ex)
 
