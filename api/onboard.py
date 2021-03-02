@@ -131,7 +131,7 @@ def sym_user_id_get(symphony_client: BotClient, email_address: str):
     except Exception as ex:
         sym_err_log.exception(ex)
         
-        raise api_ex.SymphonyException(f'User Id lookup for {email_address} failed with exception')
+        raise api_ex.SymphonyException(f'There was a problem creating your user account. Please contact support. CODE: 011-54')
 
 # 6. Add user to Symphony
 def sym_user_create(symphony_client: BotClient, firstname: str, lastname: str, email_address: str, company_name: str,

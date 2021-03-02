@@ -14,13 +14,17 @@ async def validate_bulk_payload(api_request):
 
     if not payload:
         logging.error('Inbound payload empty. Cannot proceed with user creation.')
-        return False
+        return False, 'Payload is empty.'
 
-    user_list = []
-    for u in payload:
-        user_list.append(SingleUser(u))
+    if not payload.get('sponsor_id'):
+        logging.error('Sponsor Id is missing.')
+        return False, 'Payload did not contain a sponsor Id.'
 
-    return user_list
+    if not payload.get('users'):
+        logging.error('User list is missing.')
+        return False, 'Payload did not contain a list of users to onboard.'
+
+    return payload, ''
 
 async def validate_single_payload(api_request):
     """
@@ -65,7 +69,7 @@ async def validate_single_payload(api_request):
         err_msg = f"The following fields are missing values: {','.join(missing_values)}"
 
     if is_valid:
-        return SingleUser(payload)
+        return payload
     else:
         logging.error(err_msg)
         return False
