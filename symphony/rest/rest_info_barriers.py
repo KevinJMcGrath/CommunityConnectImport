@@ -1,3 +1,5 @@
+import logging
+
 import symphony.rest.endpoints as sym_ep
 
 from symphony.api_base import APIBase
@@ -38,7 +40,14 @@ class InfoBarriers(APIBase):
             }
         }
 
-        return self.post(ep, payload)
+        try:
+            res = self.post(ep, payload)
+
+            return res
+        except:
+            logging.warning(f'Error creating IB policy. Policy probably already exits.')
+
+
 
     def add_users_to_ib_group(self, group_id: str, user_ids: list):
         ep = self.get_endpoint(sym_ep.add_user_ib_group(group_id))

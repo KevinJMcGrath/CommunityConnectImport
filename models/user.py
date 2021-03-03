@@ -14,10 +14,11 @@ class SingleUser:
         self.is_compliance = api_payload.get('is_compliance_officer', False)
         self.is_support = api_payload.get('is_support_contact', False)
 
-        self.sfdc_id = ""
-        self.sfdc_account_id = ""
-        self.symphony_id = ""
+        self.sfdc_id = ''
+        self.sfdc_account_id = ''
+        self.symphony_id = ''
         self.password_set = None
+        self.sponsor_account_name = ''
 
 class ImportedUser:
     def __init__(self, csv_row):

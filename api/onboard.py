@@ -1,5 +1,7 @@
 import logging
 
+from datetime import datetime
+
 import api.exceptions as api_ex
 
 from integration import salesforce
@@ -225,4 +227,60 @@ def sg_send_internal_notification(first_name: str, last_name: str, email: str, c
     """
 
     to_adds = ['kevin.mcgrath@symphony.com', 'miguel.clark@symphony.com', 'sharon.hackett@symphony.com']
-    sg.send_email(from_address='onboarding@symphony.com', to_addresses=to_adds, subject=subj, body_html=body)
+    sg.send_email_async(from_address='onboarding@symphony.com', to_addresses=to_adds, subject=subj, body_html=body)
+
+
+def sg_send_internal_failure_notification_bulk(failed_users: dict):
+    if not failed_users:
+        return
+
+    failed_headers = ['Email', 'Error']
+    failed_data = []
+
+    for user, err in failed_users.items():
+        failed_data.append([user.email, err])
+
+    fn_date = datetime.now().isoformat().replace(':', '_')
+    filename = f'comcon_failed_users_{fn_date}.csv'
+
+    att = sg.create_attachment_csv(filename=filename, headers=failed_headers, data=failed_data)
+
+    from_email = 'onboarding@symphony.com'
+    to_addy = ['kevinmcgr@gmail.com']
+    subj = 'ComCon Users what failed to onboard'
+    body = f"""
+    <html>
+    <body>
+        <p style="font-size:1.2em;">Some users could not be onboarded. See attachment</p>
+    </body>
+    </html>
+    """
+    sg.send_email(from_address=from_email, to_addresses=to_addy, subject=subj, body_html=body, attachment_list=[att])
+
+
+def sg_send_internal_success_notification_bulk(success_users: list):
+    if not success_users:
+        return
+
+    success_data = []
+    succes_headers = ['Email', 'Company', 'Sponsor', 'Sponsor_Id']
+    for user in success_users:
+        u = [user.email, user.company, user.sponsor_account_name, user.sponsor_account_id]
+
+
+    fn_date = datetime.now().isoformat().replace(':', '_')
+    filename = f'comcon_success_users_{fn_date}.csv'
+
+    att = sg.create_attachment_csv(filename=filename, headers=succes_headers, data=success_data)
+
+    from_email = 'onboarding@symphony.com'
+    to_addy = ['kevinmcgr@gmail.com']
+    subj = 'ComCon Users successfully onboarded'
+    body = f"""
+    <html>
+    <body>
+        <p style="font-size:1.2em;">Bulk onboarding complete. See attachment for list of successfully onboarded users.</p>
+    </body>
+    </html>
+    """
+    sg.send_email(from_address=from_email, to_addresses=to_addy, subject=subj, body_html=body, attachment_list=[att])

@@ -55,13 +55,10 @@ async def mass_import():
     if not payload:
         return {"success": False, "message": err_msg}, 500
 
-    # This will actually take a CSV, not JSON.
-    is_success, err = bulk.bulk_import_users(user_list)
+    user_list = parse.parse_bulk_users(payload)
 
-    if not is_success:
-        return{"success": False, "message": err}, 500
-    else:
-        return {"success": True}
+    asyncio.get_running_loop().run_in_executor(None, bulk.bulk_import_users, user_list)
+    return {'success': True}
 
 
 @app.route('/api/v1/bulk/signup', methods=['POST'])
@@ -74,7 +71,10 @@ async def mass_signup():
     if not payload:
         return {"success": False, "message": err_msg}, 500
 
-    return {"success": True}
+    user_list = parse.parse_bulk_users(payload)
+
+    asyncio.get_running_loop().run_in_executor(None, bulk.bulk_signup_users, user_list)
+    return {'success': True}
 
 def start_app():
     app.run()
