@@ -32,7 +32,8 @@ def bulk_import_users(user_list):
 
     failed_users = failed_users | failed
 
-    onboard.sg_send_internal_notification_bulk(success_users, failed_users)
+    onboard.sg_send_internal_success_notification_bulk(success_users)
+    onboard.sg_send_internal_failure_notification_bulk(failed_users)
 
 
 def bulk_signup_users(user_list):

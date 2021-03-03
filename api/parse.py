@@ -10,7 +10,11 @@ def parse_bulk_users(payload):
     user_list = []
     for u in payload:
         su = SingleUser(u)
-        su.sponsor_sfdc_id = sponsor_id
+
+        # Allow for specifying sponsor Id as part of each user, so we can do multiple sponsors at once
+        if not su.sponsor_sfdc_id:
+            su.sponsor_sfdc_id = sponsor_id
+
         user_list.append(su)
 
     return user_list
