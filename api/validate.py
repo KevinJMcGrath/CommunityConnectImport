@@ -6,7 +6,7 @@ from models.user import SingleUser
 
 
 # FirstName,LastName,EmailAddress,CompanyName,Phone Number,Department,Title,UserRegion,IsComplianceOfficer,IsSupportContact,SponsorsSFDCid
-req_fields = ['firstname', 'lastname', 'email', 'sponsor_id', 'company_name']
+req_fields = ['firstname', 'lastname', 'email', 'sponsor_code', 'company_name']
 
 
 async def validate_bulk_payload(api_request):
@@ -16,9 +16,9 @@ async def validate_bulk_payload(api_request):
         logging.error('Inbound payload empty. Cannot proceed with user creation.')
         return False, 'Payload is empty.'
 
-    if not payload.get('sponsor_id'):
-        logging.error('Sponsor Id is missing.')
-        return False, 'Payload did not contain a sponsor Id.'
+    if not payload.get('sponsor_code'):
+        logging.error('Sponsor Code is missing.')
+        return False, 'Payload did not contain a sponsor Code.'
 
     if not payload.get('users'):
         logging.error('User list is missing.')
@@ -33,7 +33,7 @@ async def validate_single_payload(api_request):
             firstname
             lastname
             email
-            sponsor_id
+            sponsor_code
             company_name
         The following fields are optional:
             phone
