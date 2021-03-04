@@ -168,6 +168,18 @@ def get_account_name_by_id(account_id: str):
 
 
 @integration.sfdc_connection_check
+def get_account_id_by_sponspor_code(sponsor_code: str):
+    soql = 'SELECT Disabled__c, Expired__c, Redeemed__c, Community_Connect_Sponsor__c FROM Self_Service_Promo_Code__c ' \
+           'WHERE Disabled__c = false AND Expired__c = false AND Redeemed__c = false ' \
+           f"AND Code__c = '{sponsor_code}' LIMIT 1"
+
+    results = integration.sfdc_client.internal_client.query(soql)['records']
+
+    if results:
+        return results[0]
+
+
+@integration.sfdc_connection_check
 def insert_company(company_name: str):
     company_payload = {
         'Name': company_name,

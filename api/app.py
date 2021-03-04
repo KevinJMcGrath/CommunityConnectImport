@@ -19,6 +19,24 @@ async def root():
     return { "success": True }
 
 
+@app.route('/api/v1/sponsor/validate', methods=['GET'])
+async def validate_sponsor_code():
+    if not validate.validate_api_key(api_request=request):
+        return {"success": False, "message": "Invalid API Key"}, 401
+
+    sponsor_code = request.args.get('sponsor_code')
+
+    if not sponsor_code:
+        return {"success": False, "message": "Missing sponsor code"}, 400
+
+    success, result = single.lookup_sponsor_code(sponsor_code)
+
+    if success:
+        return {"success": True, "account_id": result}
+    else:
+        return {"success": False, "message": result}, 500
+
+
 @app.route('/api/v1/user/import', methods=['POST'])
 async def single_user():
     if not validate.validate_api_key(api_request=request):

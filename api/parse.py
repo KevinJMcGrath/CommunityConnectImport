@@ -8,7 +8,7 @@ def parse_bulk_users(payload):
     sponsor_id = payload.get('sponsor_id')
 
     user_list = []
-    for u in payload:
+    for u in payload['users']:
         su = SingleUser(u)
 
         # Allow for specifying sponsor Id as part of each user, so we can do multiple sponsors at once

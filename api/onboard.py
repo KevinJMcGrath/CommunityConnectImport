@@ -16,6 +16,34 @@ sym_err_log = logging.getLogger('SYM_API_ERROR')
 zen_err_log = logging.getLogger('ZEN_API_ERROR')
 sg_err_log = logging.getLogger('SG_API_ERROR')
 
+def sfdc_promo_code_lookup_account_id(sponsor_code: str):
+    """
+    Looks up the Account Id based on the provided promo code
+    :param sponsor_code:
+    :return: SFDC Account Id
+    """
+    account_id = ''
+    err_msg = ''
+
+    logging.info(f'Looking up SFDC Account Id for sponsor code {sponsor_code}')
+    account = salesforce.get_account_id_by_sponspor_code(sponsor_code)
+
+    if not account:
+        err_msg = f'Sponsor Code could not be matched to an account.'
+    elif account['Disabled__c']:
+        err_msg = f'Sponsor Code has been disabled. Please contact support for assistance.'
+    elif account['Expired__c']:
+        err_msg = f'Sponsor Code has expired. Please contact support for assistance.'
+    elif account['Redeemed__c']:
+        err_msg = f'Sponsor Code has been fully redeemed and is no longer valid. Please contact support for assistance.'
+    else:
+        account_id = account['Community_Connect_Sponsor__c']
+
+    if err_msg:
+        sfdc_err_log.error(err_msg)
+
+    return account_id, err_msg
+
 
 # 0. Check to make
 def sfdc_account_get_name(sfdc_id: str):

@@ -91,3 +91,13 @@ def finalize_user(user: SingleUser, symphony_id: str):
                              email_address=user.email)
 
     onboard.sg_send_internal_notification(user.first_name, user.last_name, user.email, user.company, sponsor_name)
+
+
+def lookup_sponsor_code(sponsor_code: str):
+    account_id, err_msg = onboard.sfdc_promo_code_lookup_account_id(sponsor_code)
+
+    if err_msg:
+        return False, err_msg
+    else:
+        return True, account_id
+
