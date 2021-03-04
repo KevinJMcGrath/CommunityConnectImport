@@ -8,3 +8,4 @@ Quart>=0.14.1
 zenpy>=2.0.24
 aiohttp_sendgrid>=0.0.4
 Hypercorn>=0.11.2
+sendgrid>=6.6.0
