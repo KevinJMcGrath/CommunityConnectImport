@@ -1,13 +1,11 @@
 import asyncio
-import logging
 
-from quart import Quart, request, abort, jsonify, make_response
+from quart import Quart, request
 
 import api.single as single
 import api.bulk as bulk
 import api.parse as parse
 import api.validate as validate
-import config
 
 
 app = Quart(__name__)
@@ -50,8 +48,12 @@ async def single_user():
 
     user = parse.parse_single_user(payload_dict)
 
-    if not single.check_sponsor_name(user):
-        return {"success": False, "message": "Your sponsor id was invalid. Please contact support. CODE: 830-18"}, 500
+    success, sponsor_result = single.lookup_sponsor_code(sponsor_code=user.sponsor_code)
+
+    if not success:
+        return {"success": False, "message": "Your sponsor code was invalid. Please contact support. CODE: 830-18"}, 500
+    else:
+        user.sponsor_sfdc_id = sponsor_result
 
     sym_id, err_msg = single.add_comcon_user(user)
 

@@ -6,6 +6,7 @@ class SingleUser:
         self.email = api_payload.get('email')
         self.company = api_payload.get('company_name')
         self.sponsor_sfdc_id = api_payload.get('sponsor_id')
+        self.sponsor_code = api_payload.get('sponsor_code')
 
         self.phone = api_payload.get('phone')
         self.department = api_payload.get('department')
