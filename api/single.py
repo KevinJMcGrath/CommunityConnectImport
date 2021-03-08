@@ -90,7 +90,9 @@ def finalize_user(user: SingleUser, symphony_id: str):
         onboard.zen_user_add(zendesk_org_id=zen_org_id, firstname=user.first_name, lastname=user.last_name,
                              email_address=user.email)
 
-    onboard.sg_send_internal_notification(user.first_name, user.last_name, user.email, user.company, sponsor_name)
+    # TODO: Figure out why this isn't working. Probably can switch to the sync method, since I offload this whole
+    # section to a new thread
+    # onboard.sg_send_internal_notification(user.first_name, user.last_name, user.email, user.company, sponsor_name)
 
 
 def lookup_sponsor_code(sponsor_code: str):
