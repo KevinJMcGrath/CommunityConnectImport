@@ -1,7 +1,7 @@
 from models.user import SingleUser
 
 def parse_single_user(payload):
-    su = SingleUser(payload)
+    return SingleUser(payload)
 
 
 

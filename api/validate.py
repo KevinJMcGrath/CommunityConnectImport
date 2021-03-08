@@ -64,7 +64,7 @@ async def validate_single_payload(api_request):
             is_valid = False
 
     if missing_fields:
-        err_msg = "The following fields are missing from the payload: {','.join(missing_fields)}"
+        err_msg = f"The following fields are missing from the payload: {','.join(missing_fields)}"
     elif missing_values:
         err_msg = f"The following fields are missing values: {','.join(missing_values)}"
 
