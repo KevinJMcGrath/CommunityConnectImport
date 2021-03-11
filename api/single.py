@@ -44,7 +44,7 @@ def add_comcon_user(user: SingleUser):
         return None, err_msg
 
 
-def finalize_user(user: SingleUser, symphony_id: str):
+def finalize_user(user: SingleUser, symphony_id: str, promo_code):
     # Salesforce record Creation
     sponsor_name = onboard.sfdc_account_get_name(user.sponsor_sfdc_id)
 
@@ -67,6 +67,8 @@ def finalize_user(user: SingleUser, symphony_id: str):
 
     # Symphony record creation
     try:
+        onboard.sfdc_increment_promo_code_redemptions(promo_code)
+
         sym_client = BotClient(config.bot_config)
         ibm = InfoBarrierManager(sym_client)
 
@@ -96,10 +98,10 @@ def finalize_user(user: SingleUser, symphony_id: str):
 
 
 def lookup_sponsor_code(sponsor_code: str):
-    account_id, err_msg = onboard.sfdc_promo_code_lookup_account_id(sponsor_code)
+    promo_code, err_msg = onboard.sfdc_promo_code_lookup_account_id(sponsor_code)
 
     if err_msg:
         return False, err_msg
     else:
-        return True, account_id
+        return True, promo_code
 

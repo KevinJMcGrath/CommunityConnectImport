@@ -53,12 +53,12 @@ async def single_user():
     if not success:
         return {"success": False, "message": "Your sponsor code was invalid. Please contact support. CODE: 830-18"}, 500
     else:
-        user.sponsor_sfdc_id = sponsor_result
+        user.sponsor_sfdc_id = sponsor_result['Community_Connect_Sponsor__c']
 
     sym_id, err_msg = single.add_comcon_user(user)
 
     if sym_id:
-        asyncio.get_running_loop().run_in_executor(None, single.finalize_user, user, sym_id)
+        asyncio.get_running_loop().run_in_executor(None, single.finalize_user, user, sym_id, sponsor_result)
         return {'success': True}
     else:
         return {"success": False, "message": err_msg}, 500

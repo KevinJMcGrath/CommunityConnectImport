@@ -168,8 +168,8 @@ def get_account_name_by_id(account_id: str):
 
 
 @integration.sfdc_connection_check
-def get_account_id_by_sponspor_code(sponsor_code: str):
-    soql = 'SELECT Disabled__c, Expired__c, Redeemed__c, Community_Connect_Sponsor__c FROM Self_Service_Promo_Code__c ' \
+def get_promo_by_sponspor_code(sponsor_code: str):
+    soql = 'SELECT Id, Redemptions__c, Disabled__c, Expired__c, Redeemed__c, Community_Connect_Sponsor__c FROM Self_Service_Promo_Code__c ' \
            'WHERE Disabled__c = false AND Expired__c = false AND Redeemed__c = false ' \
            f"AND Code__c = '{sponsor_code}' LIMIT 1"
 
@@ -177,6 +177,15 @@ def get_account_id_by_sponspor_code(sponsor_code: str):
 
     if results:
         return results[0]
+
+
+@integration.sfdc_connection_check
+def update_promo_code_redemptions(promo_code_id: str, redemption_count: int):
+    payload = {
+        "Redemptions__c": redemption_count
+    }
+
+    integration.sfdc_client.internal_client.Self_Service_Promo_Code__c.update(promo_code_id, payload)
 
 
 @integration.sfdc_connection_check

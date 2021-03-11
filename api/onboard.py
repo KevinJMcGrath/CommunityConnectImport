@@ -26,23 +26,30 @@ def sfdc_promo_code_lookup_account_id(sponsor_code: str):
     err_msg = ''
 
     logging.info(f'Looking up SFDC Account Id for sponsor code {sponsor_code}')
-    account = salesforce.get_account_id_by_sponspor_code(sponsor_code)
+    promo_code = salesforce.get_promo_by_sponspor_code(sponsor_code)
 
-    if not account:
+    if not promo_code:
         err_msg = f'Sponsor Code could not be matched to an account.'
-    elif account['Disabled__c']:
+    elif promo_code['Disabled__c']:
         err_msg = f'Sponsor Code has been disabled. Please contact support for assistance.'
-    elif account['Expired__c']:
+    elif promo_code['Expired__c']:
         err_msg = f'Sponsor Code has expired. Please contact support for assistance.'
-    elif account['Redeemed__c']:
+    elif promo_code['Redeemed__c']:
         err_msg = f'Sponsor Code has been fully redeemed and is no longer valid. Please contact support for assistance.'
-    else:
-        account_id = account['Community_Connect_Sponsor__c']
+    # else:
+    #     account_id = promo_code['Community_Connect_Sponsor__c']
 
     if err_msg:
         sfdc_err_log.error(err_msg)
 
-    return account_id, err_msg
+    return promo_code, err_msg
+
+
+def sfdc_increment_promo_code_redemptions(promo_code):
+    promo_code_id = promo_code['Id']
+    redemptions = promo_code['Redemptions__c'] + 1 if promo_code['Redemptions__c'] else 1
+
+    salesforce.update_promo_code_redemptions(promo_code_id, redemptions)
 
 
 # 0. Check to make
