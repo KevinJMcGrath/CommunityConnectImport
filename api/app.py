@@ -30,7 +30,7 @@ async def validate_sponsor_code():
     success, result = single.lookup_sponsor_code(sponsor_code)
 
     if success:
-        return {"account_id": result}
+        return {"account_id": result['Community_Connect_Sponsor__c']}
     else:
         return {"success": False, "message": result}, 500
 
