@@ -79,7 +79,10 @@ def finalize_user(user: SingleUser, symphony_id: str, promo_code):
             onboard.sym_ib_group_add_policies(ib_client=ibm, ib_group_id=ib_group_id)
 
         onboard.sym_ib_group_add_user(ib_client=ibm, ib_group_id=ib_group_id, sym_user_id=symphony_id)
+
+
     except Exception as ex:
+        logging.error(f'Unable to onboard User {user.email}')
         logging.exception(ex)
 
 
@@ -95,6 +98,8 @@ def finalize_user(user: SingleUser, symphony_id: str, promo_code):
     # TODO: Figure out why this isn't working. Probably can switch to the sync method, since I offload this whole
     # section to a new thread
     # onboard.sg_send_internal_notification(user.first_name, user.last_name, user.email, user.company, sponsor_name)
+
+    logging.info(f'User {user.email} successfully onboarded')
 
 
 def lookup_sponsor_code(sponsor_code: str):
